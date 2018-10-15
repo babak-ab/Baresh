@@ -1,5 +1,6 @@
 package com.example.babak.baresh;
 
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -23,12 +24,14 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
 import android.widget.RelativeLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.view.ViewGroup.LayoutParams;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -125,23 +128,13 @@ public class MainActivity extends AppCompatActivity {
 //                text.setText("Android custom dialog example!");
                 //dialog.show();
                 final Dialog dialog = new Dialog(MainActivity.this);
-                dialog.setContentView(R.layout.add_layout);
-                dialog.setTitle("Title...");
+                dialog.setContentView(R.layout.add_dialog_layout);
+                dialog.setTitle("Add link for download...");
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
                 text.setText("http://ipv4.download.thinkbroadband.com/5MB.zip");
                 Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
                 // if button is clicked, close the custom dialog
-                dialogButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        try {
-                            download = new Downloader(new URL((String) text.getText()));
-                            download.header();
-                        } catch (MalformedURLException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                });
+                dialogButton.setOnClickListener(new AddDialogButtonClicked((String)text.getText().toString()));
                 dialog.show();
                 break;
             default:
@@ -149,5 +142,46 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    class AddDialogButtonClicked  implements View.OnClickListener {
+
+        String mText;
+        public AddDialogButtonClicked(String text) {
+            this.mText = text;
+        }
+
+        @Override
+        public void onClick(View v) {
+            try {
+                download = new Downloader(new URL(mText));
+                download.header();
+
+                final Dialog dialog = new Dialog(MainActivity.this);
+                dialog.setContentView(R.layout.download_info_dialog_layout);
+                dialog.setTitle("Add link for download...");
+                List<String> categories = new ArrayList<String>();
+                categories.add("Automobile");
+                categories.add("Business Services");
+                categories.add("Computers");
+                categories.add("Education");
+                categories.add("Personal");
+                categories.add("Travel");
+               // String[] values = {"General","Archives","Documents","Musics","Videos","Programs"};
+
+                final Spinner spinner = (Spinner) dialog.findViewById(R.id.spinner_groups);
+                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this,
+                        android.R.layout.simple_spinner_item, categories);
+                // Drop down layout style - list view with radio button
+                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                // attaching data adapter to spinner
+                spinner.setAdapter(dataAdapter);
+                //spinner.setAdapter(new GroupsArrayAdapter(MainActivity.this, categories.toArray(new String[0])));
+                dialog.show();
+
+            } catch (MalformedURLException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }
