@@ -157,26 +157,8 @@ public class MainActivity extends AppCompatActivity {
                 download = new Downloader(new URL(mText));
                 download.header();
 
-                final Dialog dialog = new Dialog(MainActivity.this);
-                dialog.setContentView(R.layout.download_info_dialog_layout);
-                dialog.setTitle("Add link for download...");
-                List<String> categories = new ArrayList<String>();
-                categories.add("Automobile");
-                categories.add("Business Services");
-                categories.add("Computers");
-                categories.add("Education");
-                categories.add("Personal");
-                categories.add("Travel");
-               // String[] values = {"General","Archives","Documents","Musics","Videos","Programs"};
+                final DownloadInfoDialog dialog = new DownloadInfoDialog(MainActivity.this,mText);
 
-                final Spinner spinner = (Spinner) dialog.findViewById(R.id.spinner_groups);
-                ArrayAdapter<String> dataAdapter = new ArrayAdapter<String>(MainActivity.this,
-                        android.R.layout.simple_spinner_item, categories);
-                // Drop down layout style - list view with radio button
-                dataAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-                // attaching data adapter to spinner
-                spinner.setAdapter(dataAdapter);
-                //spinner.setAdapter(new GroupsArrayAdapter(MainActivity.this, categories.toArray(new String[0])));
                 dialog.show();
 
             } catch (MalformedURLException e) {
