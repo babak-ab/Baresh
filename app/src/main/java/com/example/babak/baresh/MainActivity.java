@@ -131,7 +131,7 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setContentView(R.layout.add_dialog_layout);
                 dialog.setTitle("Add link for download...");
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
-                text.setText("http://ipv4.download.thinkbroadband.com/5MB.zip");
+                text.setText("http://dl.hastidl.me/data/Friends.S01.E02.Hastidl.mkv");
                 Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
                 // if button is clicked, close the custom dialog
                 dialogButton.setOnClickListener(new AddDialogButtonClicked((String)text.getText().toString()));
@@ -154,10 +154,11 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             try {
-                download = new Downloader(new URL(mText));
-                download.header();
 
                 final DownloadInfoDialog dialog = new DownloadInfoDialog(MainActivity.this,mText);
+
+                download = new Downloader(new URL(mText),dialog);
+                download.header();
 
                 dialog.show();
 

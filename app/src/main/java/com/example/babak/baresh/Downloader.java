@@ -14,11 +14,13 @@ public class Downloader implements DownloaderInterface {
     private URL url;
     private byte numberOfThread;
     private boolean resumable;
-    private Long fileSize;
-    public Downloader(URL url) {
+    private int fileSize;
+    DownloadInfoDialog mDownloadDialog;
+    public Downloader(URL url,DownloadInfoDialog dilaog) {
         headerTask = new HttpAsyncTask(this);
         mDownloadTask = new HttpAsyncTask[8];
         this.url = url;
+        this.mDownloadDialog = dilaog;
     }
     public void header(){
         headerTask.execute(url);
@@ -36,11 +38,12 @@ public class Downloader implements DownloaderInterface {
         this.resumable = resumable;
     }
 
-    public Long getFileSize() {
+    public int getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(Long fileSize) {
+    public void setFileSize(int fileSize) {
         this.fileSize = fileSize;
+        mDownloadDialog.setFileSize(this.fileSize);
     }
 }

@@ -16,7 +16,7 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
     private static final String TAG = "MyActivity";
     private Downloader mDownloader;
     private Boolean mResumeable = false;
-    private Long mFileSize;
+    private int mFileSize;
     public HttpAsyncTask(Downloader downloader)
     {
         mDownloader = downloader;
@@ -43,16 +43,28 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
                 urlConnection.setRequestProperty("Range","bytes=0-124");
                 urlConnection.connect();
                 int responseCode = urlConnection.getResponseCode();
+                Log.e("DOWNLOAD2", String.valueOf(responseCode));
                 if(responseCode == 206){
                     mResumeable = true;
-                    String Content_Length = urlConnection.getHeaderField("Content-Length");
-                    mFileSize = Long.parseLong(Content_Length);
+                    //String Content_Length = urlConnection.getHeaderField("Content-Length");
+                    urlConnection = (HttpURLConnection) urls[0].openConnection();
+                    urlConnection.setRequestMethod("HEAD");
+                    urlConnection.setRequestProperty("Content-Type", "some/type");
+                    urlConnection.connect();
+                    responseCode = urlConnection.getResponseCode();
+                    if(responseCode == 200){
+                        String Content_Length = urlConnection.getHeaderField("Content-Length");
+                        mFileSize = Integer.parseInt(Content_Length);
+                    }else{
+
+                    }
                 }else if(responseCode == 200){
                     mResumeable = false;
                     String Content_Length = urlConnection.getHeaderField("Content-Length");
-                    mFileSize = Long.parseLong(Content_Length);
+                    mFileSize = Integer.parseInt(Content_Length);
                 }else{
                     mResumeable = false;
+                    mFileSize = 0;
                 }
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
@@ -63,18 +75,19 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
-                if (reader != null) {
-                    try {
-                        reader.close();
-                    } catch (final IOException e) {
-                        Log.e("PlaceholderFragment", "Error closing stream", e);
-                    }
-                }
+//                if (reader != null) {
+//                    try {
+//                        reader.close();
+//                    } catch (final IOException e) {
+//                        Log.e("PlaceholderFragment", "Error closing stream", e);
+//                    }
+//                }
             }
         return 1;
     }
     @Override
     protected void onPostExecute(Integer integer) {
+        Log.e("DOWNLOAD", String.valueOf(mFileSize));
         mDownloader.setResumable(mResumeable);
         mDownloader.setFileSize(mFileSize);
         mDownloader.onDownloadFinish();

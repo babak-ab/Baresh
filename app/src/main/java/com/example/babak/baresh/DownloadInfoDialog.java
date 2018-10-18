@@ -44,6 +44,24 @@ public class DownloadInfoDialog extends Dialog {
 
     }
     public void setFileSize(int size){
-
+        String string = "0";
+        double sValue;
+        if(size < 1024){
+            string = String.valueOf(size);
+        }else if(size >= 1024 && size < 1024 * 1024){
+            sValue = size / 1024.0;
+                string = String.format ("%.2f", sValue)  + "KB";
+        }else if(size > 1024 * 1024 && size < 1024 * 1024 * 1024){
+            sValue = size / (1024.0 * 1024.0);
+                string = String.format ("%.2f", sValue)  + "MB";
+        }else if(size > 1024 * 1024 * 1024 && size < 1024 * 1024 * 1204 * 1024){
+            sValue = size / (1024.0 * 1024.0 * 1024.0);
+                string = String.format ("%.2f", sValue)  + "GB";
+        }else{
+            sValue = size / (1024.0 * 1024.0 * 1024.0 * 1024.0);
+                string = String.format ("%.2f", sValue) + "TB";
+        }
+        TextView textView = (TextView)this.findViewById(R.id.textView_downloadInfoSize);
+        textView.setText(string);
     }
 }
