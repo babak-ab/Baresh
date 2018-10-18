@@ -5,6 +5,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 
@@ -40,8 +41,11 @@ public class DownloadInfoDialog extends Dialog {
         editText.setText(url);
         //spinner.setAdapter(new GroupsArrayAdapter(MainActivity.this, categories.toArray(new String[0])));
     }
-    public void setFileType(int type){
-
+    public void setFileType(String type){
+        if(type.contains("video")){
+            final ImageView imageView = (ImageView)this.findViewById(R.id.imageView_downloadInfo);
+            imageView.setImageResource(R.drawable.ic_local_movies_purple_900_48dp);
+        }
     }
     public void setFileSize(int size){
         String string = "0";

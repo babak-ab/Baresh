@@ -3,7 +3,9 @@ package com.example.babak.baresh;
 
 import android.util.Log;
 
+import java.net.FileNameMap;
 import java.net.URL;
+import java.net.URLConnection;
 
 public class Downloader implements DownloaderInterface {
 
@@ -15,12 +17,18 @@ public class Downloader implements DownloaderInterface {
     private byte numberOfThread;
     private boolean resumable;
     private int fileSize;
+    private String fileType;
     DownloadInfoDialog mDownloadDialog;
     public Downloader(URL url,DownloadInfoDialog dilaog) {
         headerTask = new HttpAsyncTask(this);
         mDownloadTask = new HttpAsyncTask[8];
         this.url = url;
+        FileNameMap fileNameMap = URLConnection.getFileNameMap();
+        String mimeType = fileNameMap.getContentTypeFor(url.toString());
+        fileType = mimeType;
+        Log.e("DOWNLOAD3", mimeType);
         this.mDownloadDialog = dilaog;
+        this.mDownloadDialog.setFileType(mimeType);
     }
     public void header(){
         headerTask.execute(url);
@@ -45,5 +53,8 @@ public class Downloader implements DownloaderInterface {
     public void setFileSize(int fileSize) {
         this.fileSize = fileSize;
         mDownloadDialog.setFileSize(this.fileSize);
+    }
+    public void setFileType(String fileType){
+        this.fileType = fileType;
     }
 }

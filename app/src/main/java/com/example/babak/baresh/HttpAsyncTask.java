@@ -6,6 +6,7 @@ import android.util.Log;
 
 import java.io.BufferedReader;
 import java.io.IOException;
+import java.net.FileNameMap;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.time.Instant;
@@ -19,6 +20,7 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
     private int mFileSize;
     public HttpAsyncTask(Downloader downloader)
     {
+
         mDownloader = downloader;
     }
     @Override
@@ -54,9 +56,9 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
                     responseCode = urlConnection.getResponseCode();
                     if(responseCode == 200){
                         String Content_Length = urlConnection.getHeaderField("Content-Length");
+
                         mFileSize = Integer.parseInt(Content_Length);
                     }else{
-
                     }
                 }else if(responseCode == 200){
                     mResumeable = false;
