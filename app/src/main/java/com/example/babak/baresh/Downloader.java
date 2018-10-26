@@ -2,48 +2,61 @@ package com.example.babak.baresh;
 
 
 import android.util.Log;
+import android.webkit.MimeTypeMap;
 
+import java.io.File;
+import java.io.IOException;
 import java.net.FileNameMap;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
-public class Downloader implements DownloaderInterface {
+public class Downloader{
 
     private static final String TAG = "MyActivity";
     private HttpAsyncTask headerTask;
     private HttpAsyncTask[] mDownloadTask;
-
+    private List<DownloaderListener> listeners = new ArrayList<DownloaderListener>();
     private URL url;
-    private byte numberOfThread;
-    private boolean resumable;
-    private int fileSize;
     private String fileType;
-    DownloadInfoDialog mDownloadDialog;
-    public Downloader(URL url,DownloadInfoDialog dilaog) {
+    private Boolean resume;
+    private int fileSize;
+    //DownloadInfoDialog mDownloadDialog;
+    public Downloader(URL url) {
         headerTask = new HttpAsyncTask(this);
         mDownloadTask = new HttpAsyncTask[8];
         this.url = url;
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(url.toString());
-        fileType = mimeType;
-        Log.e("DOWNLOAD3", mimeType);
-        this.mDownloadDialog = dilaog;
-        this.mDownloadDialog.setFileType(mimeType);
+        if(mimeType != null){
+            fileType = mimeType;
+        }else{
+            fileType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url.toString()));
+        }
+        if(fileType == null){
+            fileType = "Unknown";
+        }
+        //Log.e("DOWNLOAD3", mimetype);
+        for (DownloaderListener hl : listeners)
+            hl.onFileTypeChanged(fileType);
     }
     public void header(){
         headerTask.execute(url);
     }
-    @Override
-    public void onDownloadFinish() {
-        Log.i(TAG,"headerFinished");
-    }
 
+
+    public void addListener(DownloaderListener toAdd) {
+        listeners.add(toAdd);
+    }
     public boolean isResumable() {
-        return resumable;
+        return resume;
     }
 
     public void setResumable(boolean resumable) {
-        this.resumable = resumable;
+        this.resume = resumable;
     }
 
     public int getFileSize() {
@@ -52,7 +65,8 @@ public class Downloader implements DownloaderInterface {
 
     public void setFileSize(int fileSize) {
         this.fileSize = fileSize;
-        mDownloadDialog.setFileSize(this.fileSize);
+        for (DownloaderListener hl : listeners)
+            hl.onFileSizeChanged(this.fileSize);
     }
     public void setFileType(String fileType){
         this.fileType = fileType;

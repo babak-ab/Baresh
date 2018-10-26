@@ -1,7 +1,9 @@
 package com.example.babak.baresh;
 
 import android.app.Dialog;
+import android.app.DownloadManager;
 import android.content.Context;
+import android.graphics.drawable.Icon;
 import android.support.annotation.NonNull;
 import android.widget.ArrayAdapter;
 import android.widget.EditText;
@@ -11,12 +13,14 @@ import android.widget.TextView;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DownloadInfoDialog extends Dialog {
+public class DownloadInfoDialog extends Dialog implements DownloaderListener {
 
-    public DownloadInfoDialog(@NonNull Context context,String url) {
+
+    public DownloadInfoDialog(@NonNull Context context, String url) {
         super(context);
         setContentView(R.layout.download_info_dialog_layout);
         setTitle("Add link for download...");
@@ -41,31 +45,46 @@ public class DownloadInfoDialog extends Dialog {
         editText.setText(url);
         //spinner.setAdapter(new GroupsArrayAdapter(MainActivity.this, categories.toArray(new String[0])));
     }
-    public void setFileType(String type){
-        if(type.contains("video")){
-            final ImageView imageView = (ImageView)this.findViewById(R.id.imageView_downloadInfo);
-            imageView.setImageResource(R.drawable.ic_local_movies_purple_900_48dp);
-        }
+
+    @Override
+    public void onDownloadFinish() {
+
     }
-    public void setFileSize(int size){
+
+    @Override
+    public void onFileSizeChanged(Integer size) {
         String string = "0";
         double sValue;
         if(size < 1024){
             string = String.valueOf(size);
         }else if(size >= 1024 && size < 1024 * 1024){
             sValue = size / 1024.0;
-                string = String.format ("%.2f", sValue)  + "KB";
+            string = String.format ("%.2f", sValue)  + "KB";
         }else if(size > 1024 * 1024 && size < 1024 * 1024 * 1024){
             sValue = size / (1024.0 * 1024.0);
-                string = String.format ("%.2f", sValue)  + "MB";
+            string = String.format ("%.2f", sValue)  + "MB";
         }else if(size > 1024 * 1024 * 1024 && size < 1024 * 1024 * 1204 * 1024){
             sValue = size / (1024.0 * 1024.0 * 1024.0);
-                string = String.format ("%.2f", sValue)  + "GB";
+            string = String.format ("%.2f", sValue)  + "GB";
         }else{
             sValue = size / (1024.0 * 1024.0 * 1024.0 * 1024.0);
-                string = String.format ("%.2f", sValue) + "TB";
+            string = String.format ("%.2f", sValue) + "TB";
         }
         TextView textView = (TextView)this.findViewById(R.id.textView_downloadInfoSize);
         textView.setText(string);
+    }
+
+    @Override
+    public void onFileTypeChanged(String type) {
+        final ImageView imageView = (ImageView)this.findViewById(R.id.imageView_downloadInfo);
+        if(type.contains("video")){
+            imageView.setImageResource(R.drawable.ic_local_movies_purple_900_48dp);
+        }else if(type.contains("music") || type.contains("audio")){
+            imageView.setImageResource(R.drawable.ic_music_note_red_900_48dp);
+        }else if(type.contains("application") && type.contains("exe")){
+            imageView.setImageResource(R.drawable.ic_settings_applications_teal_900_48dp);
+        }else{
+            imageView.setImageResource(R.drawable.ic_android_light_green_900_48dp);
+        }
     }
 }

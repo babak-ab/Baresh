@@ -41,6 +41,8 @@ public class MainActivity extends AppCompatActivity {
     private Button button;
     private Downloader download;
     private DBHelper mDb;
+    private DownloadManager downloadManager;
+    private ArrayList<Downloader> dataModels;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,11 +70,9 @@ public class MainActivity extends AppCompatActivity {
        // mButton = (Button) findViewById(R.id.);
 
         ListView l = (ListView) findViewById(R.id.listView);
-        String[] values = new String[] { "Ubuntu", "Android", "iPhone",
-                "Windows", "Ubuntu", "Android", "iPhone", "Windows" };
-        DownloadArrayAdapter adapter = new DownloadArrayAdapter(this,values);
-        l.setAdapter(adapter);
-
+        dataModels = new ArrayList<>();
+        downloadManager = new DownloadManager(dataModels,this);
+        l.setAdapter(downloadManager);
 
 
         button = (Button) findViewById(R.id.button);
@@ -131,7 +131,9 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setContentView(R.layout.add_dialog_layout);
                 dialog.setTitle("Add link for download...");
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
-                text.setText("http://dl.hastidl.me/data/Friends.S01.E02.Hastidl.mkv");
+                //text.setText("http://dl.hastidl.me/data/Friends.S01.E02.Hastidl.mkv");
+                //text.setText("https://host2.rjmusicmedia.com/media/podcast/mp3-192/Abo-Atash-109.mp3");
+                text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
                 Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
                 // if button is clicked, close the custom dialog
                 dialogButton.setOnClickListener(new AddDialogButtonClicked((String)text.getText().toString()));
@@ -154,12 +156,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             try {
-
-                final DownloadInfoDialog dialog = new DownloadInfoDialog(MainActivity.this,mText);
-
-                download = new Downloader(new URL(mText),dialog);
+                download = new Downloader(new URL(mText));
                 download.header();
-
+                final DownloadInfoDialog dialog = new DownloadInfoDialog(MainActivity.this,mText);
                 dialog.show();
 
             } catch (MalformedURLException e) {
