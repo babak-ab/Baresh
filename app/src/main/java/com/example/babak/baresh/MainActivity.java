@@ -75,6 +75,7 @@ public class MainActivity extends AppCompatActivity {
         l.setAdapter(downloadManager);
 
 
+
         button = (Button) findViewById(R.id.button);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -95,45 +96,13 @@ public class MainActivity extends AppCompatActivity {
         switch (item.getItemId()) {
             // action with ID action_refresh was selected
             case R.id.action_add:
-//                LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(LAYOUT_INFLATER_SERVICE);
-//
-//                // Inflate the custom layout/view
-//                View customView = inflater.inflate(R.layout.add_layout,null);
-//
-//                // Initialize a new instance of popup window
-//                mPopupWindow = new PopupWindow(
-//                        customView,
-//                        LayoutParams.WRAP_CONTENT,
-//                        LayoutParams.WRAP_CONTENT
-//                );
-//
-//                // Set an elevation value for popup window
-//                // Call requires API level 21
-//                if(Build.VERSION.SDK_INT>=21){
-//                    mPopupWindow.setElevation(5.0f);
-//                }
-//                // Closes the popup window when touch outside.
-//                mPopupWindow.setOutsideTouchable(true);
-//                mPopupWindow.setFocusable(true);
-//                // Removes default background.
-//                mPopupWindow.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-//                mPopupWindow.showAtLocation(mLinearLayout, Gravity.CENTER,0,0);
-
-//                final Dialog dialog = new Dialog(getApplicationContext());
-//                dialog.setContentView(R.layout.add_layout);
-//                dialog.setTitle("Title...");
-//
-//                // set the custom dialog components - text, image and button
-//                TextView text = (TextView) dialog.findViewById(R.id.text);
-//                text.setText("Android custom dialog example!");
-                //dialog.show();
                 final Dialog dialog = new Dialog(MainActivity.this);
                 dialog.setContentView(R.layout.add_dialog_layout);
                 dialog.setTitle("Add link for download...");
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
-                //text.setText("http://dl.hastidl.me/data/Friends.S01.E02.Hastidl.mkv");
+                text.setText("http://dl.hastidl.me/data/Friends.S01.E02.Hastidl.mkv");
                 //text.setText("https://host2.rjmusicmedia.com/media/podcast/mp3-192/Abo-Atash-109.mp3");
-                text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
+                //text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
                 Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
                 // if button is clicked, close the custom dialog
                 dialogButton.setOnClickListener(new AddDialogButtonClicked((String)text.getText().toString()));
@@ -156,9 +125,9 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             try {
-                download = new Downloader(new URL(mText));
-                download.header();
+                Downloader downloader = downloadManager.CreateDownload(new URL(this.mText));
                 final DownloadInfoDialog dialog = new DownloadInfoDialog(MainActivity.this,mText);
+                downloader.addListener(dialog);
                 dialog.show();
 
             } catch (MalformedURLException e) {

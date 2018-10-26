@@ -1,6 +1,7 @@
 package com.example.babak.baresh;
 
 
+import android.content.Context;
 import android.util.Log;
 import android.webkit.MimeTypeMap;
 
@@ -24,8 +25,9 @@ public class Downloader{
     private String fileType;
     private Boolean resume;
     private int fileSize;
+    private Context mContext;
     //DownloadInfoDialog mDownloadDialog;
-    public Downloader(URL url) {
+    public Downloader(Context context,URL url) {
         headerTask = new HttpAsyncTask(this);
         mDownloadTask = new HttpAsyncTask[8];
         this.url = url;
@@ -39,9 +41,11 @@ public class Downloader{
         if(fileType == null){
             fileType = "Unknown";
         }
-        //Log.e("DOWNLOAD3", mimetype);
+        mContext = context;
+
         for (DownloaderListener hl : listeners)
             hl.onFileTypeChanged(fileType);
+        header();
     }
     public void header(){
         headerTask.execute(url);

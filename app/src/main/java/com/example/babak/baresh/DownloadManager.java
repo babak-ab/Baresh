@@ -26,6 +26,13 @@ public class DownloadManager extends ArrayAdapter<Downloader> {
         this.dataSet = data;
         this.mContext=context;
     }
+    public Downloader CreateDownload(URL url){
+        Downloader downloader = new Downloader(mContext,url);
+        dataSet.add(downloader);
+        return downloader;
+//        download = new Downloader(new URL(mText));
+//        download.header();
+    }
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) mContext
