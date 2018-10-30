@@ -1,37 +1,22 @@
 package com.example.babak.baresh;
 
-import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
-import android.graphics.Color;
-import android.graphics.Typeface;
-import android.graphics.drawable.ColorDrawable;
-import android.os.Build;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.view.Gravity;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
-import android.widget.RelativeLayout;
-import android.widget.Spinner;
 import android.widget.TextView;
-import android.view.ViewGroup.LayoutParams;
 
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
-import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -41,7 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private Button button;
     private Downloader download;
     private DBHelper mDb;
-    private DownloadManager downloadManager;
+    private DownloadManager mDownloadManager;
     private ArrayList<Downloader> dataModels;
 
     @Override
@@ -71,8 +56,8 @@ public class MainActivity extends AppCompatActivity {
 
         ListView l = (ListView) findViewById(R.id.listView);
         dataModels = new ArrayList<>();
-        downloadManager = new DownloadManager(dataModels,this);
-        l.setAdapter(downloadManager);
+        mDownloadManager = new DownloadManager(dataModels,this);
+        l.setAdapter(mDownloadManager);
 
 
 
@@ -116,20 +101,15 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class AddDialogButtonClicked  implements View.OnClickListener {
-
         String mText;
         public AddDialogButtonClicked(String text) {
             this.mText = text;
         }
-
         @Override
         public void onClick(View v) {
             try {
-                Downloader downloader = downloadManager.CreateDownload(new URL(this.mText));
-                final DownloadInfoDialog dialog = new DownloadInfoDialog(MainActivity.this,mText);
-                downloader.addListener(dialog);
-                dialog.show();
-
+               mDownloadManager.CreateDownload(new URL(this.mText));
+               
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }

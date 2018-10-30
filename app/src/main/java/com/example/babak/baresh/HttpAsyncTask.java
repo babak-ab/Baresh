@@ -14,8 +14,9 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
 
     private static final String TAG = "MyActivity";
     private Downloader mDownloader;
-    private Boolean mResume = false;
+    private Boolean mPartialContent = false;
     private int mFileSize;
+    private String mFileName;
     public HttpAsyncTask(Downloader downloader) {
         mDownloader = downloader;
     }
@@ -32,7 +33,7 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
                 int responseCode = urlConnection.getResponseCode();
                 Log.e("DOWNLOAD2", String.valueOf(responseCode));
                 if(responseCode == 206){
-                    mResume = true;
+                    mPartialContent = true;
                     //String Content_Length = urlConnection.getHeaderField("Content-Length");
                     urlConnection = (HttpURLConnection) urls[0].openConnection();
                     urlConnection.setRequestMethod("HEAD");
@@ -41,16 +42,48 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
                     responseCode = urlConnection.getResponseCode();
                     if(responseCode == 200){
                         String Content_Length = urlConnection.getHeaderField("Content-Length");
-
                         mFileSize = Integer.parseInt(Content_Length);
+                        String disposition = urlConnection.getHeaderField("Content-Disposition");
+                        //String contentType = httpConn.getContentType();
+                        //int contentLength = httpConn.getContentLength();
+                        if (disposition != null) {
+                            // extracts file name from header field
+                            int index = disposition.indexOf("filename=");
+                            if (index > 0) {
+                                mFileName = disposition.substring(index + 10,
+                                        disposition.length() - 1);
+                            }
+                        } else {
+                            // extracts file name from URL
+                            String str = urls[0].toString();
+                            mFileName = str.substring(str.lastIndexOf("/") + 1,
+                                    str.length());
+                        }
+
                     }else{
                     }
                 }else if(responseCode == 200){
-                    mResume = false;
+                    mPartialContent = false;
                     String Content_Length = urlConnection.getHeaderField("Content-Length");
                     mFileSize = Integer.parseInt(Content_Length);
+                    String disposition = urlConnection.getHeaderField("Content-Disposition");
+                    //String contentType = httpConn.getContentType();
+                    //int contentLength = httpConn.getContentLength();
+                    if (disposition != null) {
+                        // extracts file name from header field
+                        int index = disposition.indexOf("filename=");
+                        if (index > 0) {
+                            mFileName = disposition.substring(index + 10,
+                                    disposition.length() - 1);
+                        }
+                    } else {
+                        // extracts file name from URL
+                        String str = urls[0].toString();
+                        mFileName = str.substring(str.lastIndexOf("/") + 1,
+                                str.length());
+                    }
                 }else{
-                    mResume = false;
+                    mPartialContent = false;
                     mFileSize = 0;
                 }
             } catch (IOException e) {
@@ -66,7 +99,8 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
     @Override
     protected void onPostExecute(Integer integer) {
         Log.e("DOWNLOAD", String.valueOf(mFileSize));
-        mDownloader.setResumable(mResume);
+        mDownloader.setPartialContent(mPartialContent);
         mDownloader.setFileSize(mFileSize);
+        mDownloader.setFileName(mFileName);
     }
 }

@@ -5,7 +5,9 @@ import android.app.DownloadManager;
 import android.content.Context;
 import android.graphics.drawable.Icon;
 import android.support.annotation.NonNull;
+import android.view.View;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
@@ -19,9 +21,11 @@ import java.util.List;
 
 public class DownloadInfoDialog extends Dialog implements DownloaderListener {
 
-
-    public DownloadInfoDialog(@NonNull Context context, String url) {
+    private Downloader mDownloader;
+    private DownloadInfoDialogListener mListener;
+    public DownloadInfoDialog(@NonNull Context context,Downloader downloader, String urlString) {
         super(context);
+        mDownloader = downloader;
         setContentView(R.layout.download_info_dialog_layout);
         setTitle("Add link for download...");
         List<String> categories = new ArrayList<String>();
@@ -42,8 +46,21 @@ public class DownloadInfoDialog extends Dialog implements DownloaderListener {
         spinner.setAdapter(dataAdapter);
 
         final EditText editText = (EditText)this.findViewById(R.id.editText_downloadInfoUrl);
-        editText.setText(url);
+        editText.setText(urlString);
         //spinner.setAdapter(new GroupsArrayAdapter(MainActivity.this, categories.toArray(new String[0])));
+
+        final Button button = (Button)this.findViewById(R.id.button_downloadInfoStart);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                mListener.onDownloadAccepted(mDownloader);
+                DownloadInfoDialog.this.dismiss();
+            }
+        });
+    }
+
+    public void setListener(DownloadInfoDialogListener listener){
+        mListener = listener;
     }
 
     @Override

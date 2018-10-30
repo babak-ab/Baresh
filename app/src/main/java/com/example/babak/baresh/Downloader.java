@@ -2,16 +2,11 @@ package com.example.babak.baresh;
 
 
 import android.content.Context;
-import android.util.Log;
 import android.webkit.MimeTypeMap;
 
-import java.io.File;
-import java.io.IOException;
 import java.net.FileNameMap;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,13 +18,16 @@ public class Downloader{
     private List<DownloaderListener> listeners = new ArrayList<DownloaderListener>();
     private URL url;
     private String fileType;
-    private Boolean resume;
+    private Boolean isPartialContent;
     private int fileSize;
     private Context mContext;
+    private String mFileName;
+    private long mDownloadedSize;
     //DownloadInfoDialog mDownloadDialog;
     public Downloader(Context context,URL url) {
         headerTask = new HttpAsyncTask(this);
         mDownloadTask = new HttpAsyncTask[8];
+        mDownloadedSize = 0;
         this.url = url;
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(url.toString());
@@ -55,12 +53,12 @@ public class Downloader{
     public void addListener(DownloaderListener toAdd) {
         listeners.add(toAdd);
     }
-    public boolean isResumable() {
-        return resume;
+    public boolean isPartialContent() {
+        return isPartialContent;
     }
 
-    public void setResumable(boolean resumable) {
-        this.resume = resumable;
+    public void setPartialContent(boolean partialContent) {
+        this.isPartialContent = partialContent;
     }
 
     public int getFileSize() {
@@ -74,5 +72,17 @@ public class Downloader{
     }
     public void setFileType(String fileType){
         this.fileType = fileType;
+    }
+
+    public String getFileName() {
+        return mFileName;
+    }
+
+    public void setFileName(String fileName) {
+        this.mFileName = fileName;
+    }
+
+    public long getDownloadedSize() {
+        return mDownloadedSize;
     }
 }
