@@ -90,7 +90,7 @@ public class MainActivity extends AppCompatActivity {
                 //text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
                 Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
                 // if button is clicked, close the custom dialog
-                dialogButton.setOnClickListener(new AddDialogButtonClicked((String)text.getText().toString()));
+                dialogButton.setOnClickListener(new AddDialogButtonClicked(dialog,(String)text.getText().toString()));
                 dialog.show();
                 break;
             default:
@@ -101,15 +101,17 @@ public class MainActivity extends AppCompatActivity {
     }
 
     class AddDialogButtonClicked  implements View.OnClickListener {
-        String mText;
-        public AddDialogButtonClicked(String text) {
+        private String mText;
+        private Dialog mDialog;
+        public AddDialogButtonClicked(Dialog dialog, String text) {
             this.mText = text;
+            this.mDialog = dialog;
         }
         @Override
         public void onClick(View v) {
             try {
+                mDialog.dismiss();
                mDownloadManager.CreateDownload(new URL(this.mText));
-               
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }

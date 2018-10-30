@@ -62,8 +62,8 @@
             android:layout_height="21dp"
             android:layout_weight="3"
             android:max="100"
-            android:min="0"
             android:progress="0"
+            android:min="0"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -98,7 +98,7 @@
             android:gravity="right"
             android:text="01:00/20:00"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/progressBar3"
+            app:layout_constraintEnd_toEndOf="@+id/download_progressBar"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView

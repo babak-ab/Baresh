@@ -33,7 +33,6 @@ public class DownloadManager extends ArrayAdapter<Downloader> implements Downloa
         dialog.setListener(this);
         downloader.addListener(dialog);
         dialog.show();
-
     }
     public void onDownloadAccepted(Downloader downloader){
         dataSet.add(downloader);
