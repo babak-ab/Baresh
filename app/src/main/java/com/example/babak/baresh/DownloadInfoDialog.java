@@ -19,13 +19,13 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DownloadInfoDialog extends Dialog implements DownloaderListener {
+public class DownloadInfoDialog extends Dialog{
 
-    private Downloader mDownloader;
+    private Long mDownloadId;
     private DownloadInfoDialogListener mListener;
-    public DownloadInfoDialog(@NonNull Context context,Downloader downloader, String urlString) {
+    public DownloadInfoDialog(@NonNull Context context,Long downloadId, String urlString) {
         super(context);
-        mDownloader = downloader;
+        mDownloadId = downloadId;
         setContentView(R.layout.download_info_dialog_layout);
         setTitle("Add link for download...");
         List<String> categories = new ArrayList<String>();
@@ -53,8 +53,8 @@ public class DownloadInfoDialog extends Dialog implements DownloaderListener {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                mListener.onDownloadAccepted(mDownloader);
-                DownloadInfoDialog.this.dismiss();
+                mListener.onDownloadAccepted(mDownloadId);
+                //DownloadInfoDialog.this.dismiss();
             }
         });
     }
@@ -63,13 +63,7 @@ public class DownloadInfoDialog extends Dialog implements DownloaderListener {
         mListener = listener;
     }
 
-    @Override
-    public void onDownloadFinish() {
-
-    }
-
-    @Override
-    public void onFileSizeChanged(Integer size) {
+    public void setFileSizeChanged(Long size) {
         String string = "0";
         double sValue;
         if(size < 1024){
@@ -91,8 +85,7 @@ public class DownloadInfoDialog extends Dialog implements DownloaderListener {
         textView.setText(string);
     }
 
-    @Override
-    public void onFileTypeChanged(String type) {
+    public void setFileTypeChanged(String type) {
         final ImageView imageView = (ImageView)this.findViewById(R.id.imageView_downloadInfo);
         if(type.contains("video")){
             imageView.setImageResource(R.drawable.ic_local_movies_purple_900_48dp);
@@ -104,4 +97,5 @@ public class DownloadInfoDialog extends Dialog implements DownloaderListener {
             imageView.setImageResource(R.drawable.ic_android_light_green_900_48dp);
         }
     }
+
 }

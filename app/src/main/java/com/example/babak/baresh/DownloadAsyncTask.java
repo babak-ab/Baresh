@@ -12,7 +12,7 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.logging.LogManager;
 
-public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
+public class DownloadAsyncTask extends AsyncTask<URL, Long, Integer> {
 
     private static final String TAG = "MyActivity";
     private Downloader mDownloader;
@@ -35,7 +35,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
             urlConnection.connect();
             int responseCode = urlConnection.getResponseCode();
             if(responseCode == 200){
-                int lenghtOfFile = urlConnection.getContentLength();
+                int lengthOfFile = urlConnection.getContentLength();
 
                 //this is where the file will be seen after the download
                 //FileOutputStream f = new FileOutputStream(new File(rootDir + “/my_downloads/”, fileName));
@@ -48,7 +48,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
                 long total = 0;
                 while ((len1 = in.read(buffer)) > 0) {
                     total += len1; //total = total + len1
-                    publishProgress((int)((total*100)/lenghtOfFile));
+                    publishProgress(total);
                 }
             }
         } catch (IOException e) {
@@ -63,6 +63,6 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
     }
     protected void onProgressUpdate(Integer progress) {
         Log.e("DOWNLOAD", String.valueOf(progress));
-       // mDownloader.setProgress(Integer.parseInt(progress[0]));
+        mDownloader.setDownloadedSize(progress);
     }
 }

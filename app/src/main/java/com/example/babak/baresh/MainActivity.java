@@ -16,7 +16,7 @@ import android.widget.TextView;
 
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
+import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -25,9 +25,8 @@ public class MainActivity extends AppCompatActivity {
     private LinearLayout mLinearLayout;
     private Button button;
     private Downloader download;
-    private DBHelper mDb;
     private DownloadManager mDownloadManager;
-    private ArrayList<Downloader> dataModels;
+    private HashMap<Long,Downloader> dataModels;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,8 +53,9 @@ public class MainActivity extends AppCompatActivity {
 
        // mButton = (Button) findViewById(R.id.);
 
+
         ListView l = (ListView) findViewById(R.id.listView);
-        dataModels = new ArrayList<>();
+        dataModels = new HashMap<>();
         mDownloadManager = new DownloadManager(dataModels,this);
         l.setAdapter(mDownloadManager);
 
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
         public void onClick(View v) {
             try {
                 mDialog.dismiss();
-               mDownloadManager.CreateDownload(new URL(this.mText));
+               mDownloadManager.createDownload(new URL(this.mText));
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }

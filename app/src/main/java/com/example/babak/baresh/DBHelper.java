@@ -37,15 +37,15 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public boolean insertLink (String name, String address, String path, Boolean resume) {
+    public long insertLink (String name, String address, String path, Boolean resume) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put("name", name);
         contentValues.put("address", address);
         contentValues.put("path", path);
         contentValues.put("resume", resume);
-        db.insert("links", null, contentValues);
-        return true;
+        long id = db.insert("links", null, contentValues);
+        return id;
     }
 
     public Cursor getData(int id) {

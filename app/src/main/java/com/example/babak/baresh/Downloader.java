@@ -2,6 +2,7 @@ package com.example.babak.baresh;
 
 
 import android.content.Context;
+import android.util.Log;
 import android.webkit.MimeTypeMap;
 
 import java.net.FileNameMap;
@@ -11,24 +12,26 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Downloader{
-
     private static final String TAG = "MyActivity";
     private HttpAsyncTask headerTask;
-    private HttpAsyncTask[] mDownloadTask;
-    private List<DownloaderListener> listeners = new ArrayList<DownloaderListener>();
-    private URL url;
+    private DownloadAsyncTask[] mDownloadTask;
+    private URL mUrl;
+    private Long mId;
     private String fileType;
     private Boolean isPartialContent;
-    private int fileSize;
+    private long mFileSize;
     private Context mContext;
     private String mFileName;
     private long mDownloadedSize;
+    private DownloadManager mDownloadManager;
     //DownloadInfoDialog mDownloadDialog;
-    public Downloader(Context context,URL url) {
+    public Downloader(Long id,URL url,DownloadManager downloadManager,Context context) {
         headerTask = new HttpAsyncTask(this);
-        mDownloadTask = new HttpAsyncTask[8];
+        mDownloadTask = new DownloadAsyncTask[8];
         mDownloadedSize = 0;
-        this.url = url;
+        mDownloadManager = downloadManager;
+        mUrl = url;
+        mId = id;
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(url.toString());
         if(mimeType != null){
@@ -41,18 +44,16 @@ public class Downloader{
         }
         mContext = context;
 
-        for (DownloaderListener hl : listeners)
-            hl.onFileTypeChanged(fileType);
         header();
     }
     public void header(){
-        headerTask.execute(url);
+        headerTask.execute(mUrl);
     }
 
-
-    public void addListener(DownloaderListener toAdd) {
-        listeners.add(toAdd);
+    public URL getUrl(){
+        return  mUrl;
     }
+
     public boolean isPartialContent() {
         return isPartialContent;
     }
@@ -61,14 +62,13 @@ public class Downloader{
         this.isPartialContent = partialContent;
     }
 
-    public int getFileSize() {
-        return fileSize;
+    public long getFileSize() {
+        return mFileSize;
     }
 
-    public void setFileSize(int fileSize) {
-        this.fileSize = fileSize;
-        for (DownloaderListener hl : listeners)
-            hl.onFileSizeChanged(this.fileSize);
+    public void setFileSize(long fileSize) {
+        mFileSize = fileSize;
+        mDownloadManager.setFileSize(mFileSize);
     }
     public void setFileType(String fileType){
         this.fileType = fileType;
@@ -82,7 +82,15 @@ public class Downloader{
         this.mFileName = fileName;
     }
 
+    public void setDownloadedSize(long downloadedSize){
+        mDownloadManager.setDownloadedSize(downloadedSize);
+    }
+
     public long getDownloadedSize() {
         return mDownloadedSize;
+    }
+
+    public Long getId() {
+        return mId;
     }
 }
