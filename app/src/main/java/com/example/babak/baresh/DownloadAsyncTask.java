@@ -12,16 +12,20 @@ import java.net.URL;
 import java.time.Instant;
 import java.util.logging.LogManager;
 
-public class DownloadAsyncTask extends AsyncTask<URL, Long, Integer> {
+public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
 
     private static final String TAG = "MyActivity";
     private Downloader mDownloader;
-    private  Integer mStartByte;
-    private  Integer mEndByte;
-    public DownloadAsyncTask(Downloader downloader,Integer startByte,Integer endByte) {
+    private Integer mStartByte;
+    private Integer mEndByte;
+    private Integer mTaskId;
+    public DownloadAsyncTask(int taskId,Downloader downloader) {
+        mDownloader = downloader;
+        mTaskId = taskId;
+    }
+    public void setRange(Integer startByte,Integer endByte){
         mStartByte = startByte;
         mEndByte = endByte;
-        mDownloader = downloader;
     }
     @Override
     protected Integer doInBackground(URL... urls) {
@@ -34,7 +38,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, Long, Integer> {
             //urlConnection.setDoOutput(true);
             urlConnection.connect();
             int responseCode = urlConnection.getResponseCode();
-            if(responseCode == 200){
+            if(responseCode == 200 || responseCode == 206){
                 int lengthOfFile = urlConnection.getContentLength();
 
                 //this is where the file will be seen after the download
@@ -45,10 +49,10 @@ public class DownloadAsyncTask extends AsyncTask<URL, Long, Integer> {
                 //here’s the download code
                 byte[] buffer = new byte[mEndByte - mStartByte + 1];
                 int len1 = 0;
-                long total = 0;
+                int total = 0;
                 while ((len1 = in.read(buffer)) > 0) {
-                    total += len1; //total = total + len1
-                    publishProgress(total);
+                    //total += len1; //total = total + len1
+                    publishProgress(len1);
                 }
             }
         } catch (IOException e) {
@@ -61,8 +65,15 @@ public class DownloadAsyncTask extends AsyncTask<URL, Long, Integer> {
         }
         return 1;
     }
-    protected void onProgressUpdate(Integer progress) {
-        Log.e("DOWNLOAD", String.valueOf(progress));
-        mDownloader.setDownloadedSize(progress);
+    @Override
+    protected void onPostExecute(Integer result) {
+        super.onPostExecute(result);
+        //mDownloader.setDownloadedSize(mEndByte - mStartByte + 1);
+        mDownloader.onFinishDownload(mTaskId);
+    }
+    protected void onProgressUpdate(Integer... progress) {
+        super.onProgressUpdate(progress);
+        //Log.e("DOWNLOAD123", String.valueOf(progress[0]));
+        mDownloader.setDownloadedSize(progress[0]);
     }
 }

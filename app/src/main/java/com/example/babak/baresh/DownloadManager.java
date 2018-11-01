@@ -3,6 +3,7 @@ package com.example.babak.baresh;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TimerTask;
 
 public class DownloadManager extends BaseAdapter implements DownloadInfoDialogListener {
     private HashMap<Long,Downloader> dataSet;
@@ -53,6 +55,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
     public void onDownloadAccepted(Long downloadId){
         if(dialog != null)
             dialog.dismiss();
+        dataSet.get(downloadId).download();
         notifyDataSetChanged();
     }
 
@@ -83,7 +86,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
             }
         }
     }
-    public void setDownloadedSize(long downloadedSize) {
+    public void onDownloadSizeChanged() {
         notifyDataSetChanged();
     }
 
@@ -99,7 +102,30 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         fileName.setText(dataModel.getFileName());
 
         final ProgressBar progress = (ProgressBar)rowView.findViewById(R.id.download_progressBar);
-        progress.setProgress((int)(dataModel.getDownloadedSize() / dataModel.getFileSize() * 100));
+        if(dataModel.getFileSize() > 0)
+            progress.setProgress((int)(dataModel.getDownloadedSize() / (float)dataModel.getFileSize() * 100.0));
+
+        String speedStr;
+        double sValue;
+        int speed = dataModel.getSpeed();
+        if(dataModel.getSpeed() < 1024){
+            speedStr = String.valueOf(dataModel.getSpeed());
+        }else if(speed >= 1024 && dataModel.getSpeed() < 1024 * 1024){
+            sValue = speed / 1024.0;
+            speedStr = String.format ("%.2f", sValue)  + "KB/s";
+        }else if(speed > 1024 * 1024 && speed < 1024 * 1024 * 1024){
+            sValue = speed / (1024.0 * 1024.0);
+            speedStr = String.format ("%.2f", sValue)  + "MB/s";
+        }else if(speed > 1024 * 1024 * 1024 && speed < 1024 * 1024 * 1204 * 1024){
+            sValue = speed / (1024.0 * 1024.0 * 1024.0);
+            speedStr = String.format ("%.2f", sValue)  + "GB/s";
+        }else{
+            sValue = speed / (1024.0 * 1024.0 * 1024.0 * 1024.0);
+            speedStr = String.format ("%.2f", sValue) + "TB/s";
+        }
+        final TextView speedTextView = (TextView)rowView.findViewById(R.id.speed_textView);
+        speedTextView.setText(speedStr);
+
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -108,4 +134,5 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         });
         return rowView;
     }
+
 }

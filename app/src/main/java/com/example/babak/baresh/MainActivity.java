@@ -85,6 +85,7 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setContentView(R.layout.add_dialog_layout);
                 dialog.setTitle("Add link for download...");
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
+                //text.setText("http://www.ovh.net/files/1Mb.dat");
                 text.setText("http://dl.hastidl.me/data/Friends.S01.E02.Hastidl.mkv");
                 //text.setText("https://host2.rjmusicmedia.com/media/podcast/mp3-192/Abo-Atash-109.mp3");
                 //text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
