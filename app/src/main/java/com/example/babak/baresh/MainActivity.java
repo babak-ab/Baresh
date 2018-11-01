@@ -1,7 +1,11 @@
 package com.example.babak.baresh;
 
+import android.Manifest;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.pm.PackageManager;
+import android.os.Build;
+import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -53,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
        // mButton = (Button) findViewById(R.id.);
 
+        isStoragePermissionGranted();
 
         ListView l = (ListView) findViewById(R.id.listView);
         dataModels = new HashMap<>();
@@ -85,8 +90,8 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setContentView(R.layout.add_dialog_layout);
                 dialog.setTitle("Add link for download...");
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
-                //text.setText("http://www.ovh.net/files/1Mb.dat");
-                text.setText("http://dl.hastidl.me/data/Friends.S01.E02.Hastidl.mkv");
+                text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
+                //text.setText("http://dl.hastidl.me/data/Friends.S01.E02.Hastidl.mkv");
                 //text.setText("https://host2.rjmusicmedia.com/media/podcast/mp3-192/Abo-Atash-109.mp3");
                 //text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
                 Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
@@ -116,6 +121,19 @@ public class MainActivity extends AppCompatActivity {
             } catch (MalformedURLException e) {
                 e.printStackTrace();
             }
+        }
+    }
+    public  boolean isStoragePermissionGranted() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (checkSelfPermission(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                    == PackageManager.PERMISSION_GRANTED) {
+                return true;
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
+                return false;
+            }
+        } else { //permission is automatically granted on sdk<23 upon installation
+            return true;
         }
     }
 }

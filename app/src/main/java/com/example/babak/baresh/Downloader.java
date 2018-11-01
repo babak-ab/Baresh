@@ -28,6 +28,7 @@ public class Downloader{
     private String mFileName;
     private long mDownloadedSize;
     private int mSpeed;
+    private int mTime;
     private DownloadManager mDownloadManager;
     //DownloadInfoDialog mDownloadDialog;
     public Downloader(Long id,URL url,DownloadManager downloadManager,Context context) {
@@ -104,6 +105,7 @@ public class Downloader{
         mDownloadTask.get(3).execute(mUrl);
 
 
+        mTime = 0;
         TimerTask speedTask = new DownloadSpeedTask();
         timer.scheduleAtFixedRate(speedTask, 0, 1000);
         //mDownloadTask[4].execute(mUrl);
@@ -166,12 +168,23 @@ public class Downloader{
     public int getSpeed() {
         return mSpeed;
     }
+    public int getTime() {
+        return mTime;
+    }
+    public int getDuration() {
+
+        if(mSpeed > 0)
+            return (int)mFileSize / mSpeed;
+        else
+            return 0;
+    }
 
     class DownloadSpeedTask extends TimerTask {
         private long prev = 0;
         public void run() {
             mSpeed = (int)(mDownloadedSize - prev);
             prev = mDownloadedSize;
+            mTime++;
         }
     }
 }

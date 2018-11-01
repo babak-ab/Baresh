@@ -98,7 +98,6 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
     }
     @Override
     protected void onPostExecute(Integer integer) {
-        Log.e("DOWNLOAD", String.valueOf(mFileSize));
         mDownloader.setPartialContent(mPartialContent);
         mDownloader.setFileSize(mFileSize);
         mDownloader.setFileName(mFileName);

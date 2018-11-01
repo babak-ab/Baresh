@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.TimerTask;
+import java.util.concurrent.TimeUnit;
 
 public class DownloadManager extends BaseAdapter implements DownloadInfoDialogListener {
     private HashMap<Long,Downloader> dataSet;
@@ -126,6 +127,25 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         final TextView speedTextView = (TextView)rowView.findViewById(R.id.speed_textView);
         speedTextView.setText(speedStr);
 
+        final TextView downloadSize = (TextView)rowView.findViewById(R.id.downloadSize_textView);
+        downloadSize.setText(getSizeToString(dataModel.getDownloadedSize())+"/"+
+                getSizeToString(dataModel.getFileSize()));
+
+        long second = dataModel.getDuration();
+        long minute = TimeUnit.SECONDS.toMinutes(second);
+        long hour = TimeUnit.SECONDS.toHours(second);
+        second -= TimeUnit.MINUTES.toSeconds(minute);
+        String duStr =  String.format("%02d:%02d", minute, second);
+
+        second = dataModel.getTime();
+        minute = TimeUnit.SECONDS.toMinutes(second);
+        hour = TimeUnit.SECONDS.toHours(second);
+        second -= TimeUnit.MINUTES.toSeconds(minute);
+        String tiStr =  String.format("%02d:%02d", minute, second);
+
+        final TextView duration = (TextView)rowView.findViewById(R.id.duration_textView);
+        duration.setText(tiStr + "/" + duStr);
+
         imageView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -134,5 +154,24 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         });
         return rowView;
     }
-
+    public String getSizeToString(long size){
+        String string = "0";
+        double sValue;
+        if(size < 1024){
+            string = String.valueOf(size);
+        }else if(size >= 1024 && size < 1024 * 1024){
+            sValue = size / 1024.0;
+            string = String.format ("%.2f", sValue)  + "KB";
+        }else if(size > 1024 * 1024 && size < 1024 * 1024 * 1024){
+            sValue = size / (1024.0 * 1024.0);
+            string = String.format ("%.2f", sValue)  + "MB";
+        }else if(size > 1024 * 1024 * 1024 && size < 1024 * 1024 * 1204 * 1024){
+            sValue = size / (1024.0 * 1024.0 * 1024.0);
+            string = String.format ("%.2f", sValue)  + "GB";
+        }else{
+            sValue = size / (1024.0 * 1024.0 * 1024.0 * 1024.0);
+            string = String.format ("%.2f", sValue) + "TB";
+        }
+        return string;
+    }
 }
