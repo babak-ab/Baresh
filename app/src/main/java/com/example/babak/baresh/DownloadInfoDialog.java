@@ -66,15 +66,19 @@ public class DownloadInfoDialog extends Dialog{
     public void setFileSizeChanged(Long size) {
         String string = "0";
         double sValue;
+        Long TB = (long)1024 * 1024 * 1024 * 1024;
+        Long GB = (long)1024 * 1024 * 1024;
+        Long MB = (long)1024 * 1024;
+        Long KB = (long)1024;
         if(size < 1024){
             string = String.valueOf(size);
-        }else if(size >= 1024 && size < 1024 * 1024){
+        }else if(size >= KB && size < MB){
             sValue = size / 1024.0;
             string = String.format ("%.2f", sValue)  + "KB";
-        }else if(size > 1024 * 1024 && size < 1024 * 1024 * 1024){
+        }else if(size >= MB && size < GB){
             sValue = size / (1024.0 * 1024.0);
             string = String.format ("%.2f", sValue)  + "MB";
-        }else if(size > 1024 * 1024 * 1024 && size < 1024 * 1024 * 1204 * 1024){
+        }else if(size >= GB && size < TB){
             sValue = size / (1024.0 * 1024.0 * 1024.0);
             string = String.format ("%.2f", sValue)  + "GB";
         }else{

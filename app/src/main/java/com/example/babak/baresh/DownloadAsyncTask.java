@@ -23,8 +23,8 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
 
     private static final String TAG = "MyActivity";
     private Downloader mDownloader;
-    private Integer mStartByte;
-    private Integer mEndByte;
+    private Long mStartByte;
+    private Long mEndByte;
     private Integer mTaskId;
     File rootDir = Environment.getExternalStorageDirectory();
 
@@ -32,7 +32,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
         mDownloader = downloader;
         mTaskId = taskId;
     }
-    public void setRange(Integer startByte,Integer endByte){
+    public void setRange(Long startByte,Long endByte){
         mStartByte = startByte;
         mEndByte = endByte;
     }
@@ -63,7 +63,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
                //FileChannel fileChannel = ((FileOutputStream) output).getChannel();
                //fileChannel.position(mStartByte);
                 //here’s the download code
-                byte[] buffer = new byte[mEndByte - mStartByte + 1];
+                byte[] buffer = new byte[1024];
                 //byte[] buffer = new byte[1024];
                 int len1 = 0;
                 int total = 0;
@@ -72,9 +72,9 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
                     publishProgress(len1);
                    //output.write(buffer, 0, len1);
                    // fileChannel.write(ByteBuffer.wrap(buffer),len1);
-                    store.write(buffer,0,len1);
+                   store.write(buffer,0,len1);
                 }
-                store.close();
+               store.close();
                // output.close();
             }
         } catch (IOException e) {

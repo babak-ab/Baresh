@@ -62,8 +62,8 @@
             android:layout_height="21dp"
             android:layout_weight="3"
             android:max="100"
-            android:progress="0"
             android:min="0"
+            android:progress="0"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -78,17 +78,17 @@
             app:layout_constraintStart_toEndOf="@+id/downloadSize_textView"
             app:layout_constraintTop_toTopOf="parent" />
         <!--<TextView-->
-            <!--android:id="@+id/speed_textView"-->
-            <!--android:layout_width="0dp"-->
-            <!--android:layout_height="19dp"-->
-            <!--android:layout_marginTop="8dp"-->
-            <!--android:layout_marginBottom="8dp"-->
-            <!--android:layout_weight="1"-->
-            <!--android:gravity="center_horizontal"-->
-            <!--android:text="100mB/s"-->
-            <!--app:layout_constraintBottom_toBottomOf="parent"-->
-            <!--app:layout_constraintTop_toTopOf="parent"-->
-            <!--tools:layout_editor_absoluteX="157dp" />-->
+        <!--android:id="@+id/speed_textView"-->
+        <!--android:layout_width="0dp"-->
+        <!--android:layout_height="19dp"-->
+        <!--android:layout_marginTop="8dp"-->
+        <!--android:layout_marginBottom="8dp"-->
+        <!--android:layout_weight="1"-->
+        <!--android:gravity="center_horizontal"-->
+        <!--android:text="100mB/s"-->
+        <!--app:layout_constraintBottom_toBottomOf="parent"-->
+        <!--app:layout_constraintTop_toTopOf="parent"-->
+        <!--tools:layout_editor_absoluteX="157dp" />-->
 
         <TextView
             android:id="@+id/duration_textView"
@@ -96,6 +96,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="right"
+            android:paddingRight="3dp"
             android:text="01:00/20:00"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/download_progressBar"
@@ -106,6 +107,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
+            android:paddingLeft="3dp"
             android:text="54m/100m" />
 
 

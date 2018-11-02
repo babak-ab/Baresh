@@ -15,7 +15,7 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
     private static final String TAG = "MyActivity";
     private Downloader mDownloader;
     private Boolean mPartialContent = false;
-    private int mFileSize;
+    private long mFileSize;
     private String mFileName;
     public HttpAsyncTask(Downloader downloader) {
         mDownloader = downloader;
@@ -42,7 +42,7 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
                     responseCode = urlConnection.getResponseCode();
                     if(responseCode == 200){
                         String Content_Length = urlConnection.getHeaderField("Content-Length");
-                        mFileSize = Integer.parseInt(Content_Length);
+                        mFileSize = Long.parseLong(Content_Length);
                         String disposition = urlConnection.getHeaderField("Content-Disposition");
                         //String contentType = httpConn.getContentType();
                         //int contentLength = httpConn.getContentLength();
@@ -65,7 +65,7 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
                 }else if(responseCode == 200){
                     mPartialContent = false;
                     String Content_Length = urlConnection.getHeaderField("Content-Length");
-                    mFileSize = Integer.parseInt(Content_Length);
+                    mFileSize =  Long.parseLong(Content_Length);
                     String disposition = urlConnection.getHeaderField("Content-Disposition");
                     //String contentType = httpConn.getContentType();
                     //int contentLength = httpConn.getContentLength();

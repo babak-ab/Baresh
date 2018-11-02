@@ -106,24 +106,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         if(dataModel.getFileSize() > 0)
             progress.setProgress((int)(dataModel.getDownloadedSize() / (float)dataModel.getFileSize() * 100.0));
 
-        String speedStr;
-        double sValue;
-        int speed = dataModel.getSpeed();
-        if(dataModel.getSpeed() < 1024){
-            speedStr = String.valueOf(dataModel.getSpeed());
-        }else if(speed >= 1024 && dataModel.getSpeed() < 1024 * 1024){
-            sValue = speed / 1024.0;
-            speedStr = String.format ("%.2f", sValue)  + "KB/s";
-        }else if(speed > 1024 * 1024 && speed < 1024 * 1024 * 1024){
-            sValue = speed / (1024.0 * 1024.0);
-            speedStr = String.format ("%.2f", sValue)  + "MB/s";
-        }else if(speed > 1024 * 1024 * 1024 && speed < 1024 * 1024 * 1204 * 1024){
-            sValue = speed / (1024.0 * 1024.0 * 1024.0);
-            speedStr = String.format ("%.2f", sValue)  + "GB/s";
-        }else{
-            sValue = speed / (1024.0 * 1024.0 * 1024.0 * 1024.0);
-            speedStr = String.format ("%.2f", sValue) + "TB/s";
-        }
+        String speedStr = getSizeToString(dataModel.getSpeed()) +"/s";
         final TextView speedTextView = (TextView)rowView.findViewById(R.id.speed_textView);
         speedTextView.setText(speedStr);
 
@@ -131,17 +114,9 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         downloadSize.setText(getSizeToString(dataModel.getDownloadedSize())+"/"+
                 getSizeToString(dataModel.getFileSize()));
 
-        long second = dataModel.getDuration();
-        long minute = TimeUnit.SECONDS.toMinutes(second);
-        long hour = TimeUnit.SECONDS.toHours(second);
-        second -= TimeUnit.MINUTES.toSeconds(minute);
-        String duStr =  String.format("%02d:%02d", minute, second);
 
-        second = dataModel.getTime();
-        minute = TimeUnit.SECONDS.toMinutes(second);
-        hour = TimeUnit.SECONDS.toHours(second);
-        second -= TimeUnit.MINUTES.toSeconds(minute);
-        String tiStr =  String.format("%02d:%02d", minute, second);
+        String duStr = getTimeToString(dataModel.getDuration());
+        String tiStr =  getTimeToString(dataModel.getTime());
 
         final TextView duration = (TextView)rowView.findViewById(R.id.duration_textView);
         duration.setText(tiStr + "/" + duStr);
@@ -157,15 +132,19 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
     public String getSizeToString(long size){
         String string = "0";
         double sValue;
+        Long TB = (long)1024 * 1024 * 1024 * 1024;
+        Long GB = (long)1024 * 1024 * 1024;
+        Long MB = (long)1024 * 1024;
+        Long KB = (long)1024;
         if(size < 1024){
             string = String.valueOf(size);
-        }else if(size >= 1024 && size < 1024 * 1024){
+        }else if(size >= KB && size < MB){
             sValue = size / 1024.0;
             string = String.format ("%.2f", sValue)  + "KB";
-        }else if(size > 1024 * 1024 && size < 1024 * 1024 * 1024){
+        }else if(size >= MB && size < GB){
             sValue = size / (1024.0 * 1024.0);
             string = String.format ("%.2f", sValue)  + "MB";
-        }else if(size > 1024 * 1024 * 1024 && size < 1024 * 1024 * 1204 * 1024){
+        }else if(size >= GB && size < TB){
             sValue = size / (1024.0 * 1024.0 * 1024.0);
             string = String.format ("%.2f", sValue)  + "GB";
         }else{
@@ -173,5 +152,24 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
             string = String.format ("%.2f", sValue) + "TB";
         }
         return string;
+    }
+    public String getTimeToString(long second){
+        String str;
+        long minute = TimeUnit.SECONDS.toMinutes(second);
+        long hour = TimeUnit.SECONDS.toHours(second);
+        long day = TimeUnit.SECONDS.toDays(second);
+        second -= TimeUnit.MINUTES.toSeconds(minute);
+        if(day > 1){
+             str =  String.format("%d days", day);
+        }else if(day > 0){
+             str =  String.format("%d day", day);
+        }else{
+            if(hour > 0){
+                str = String.format ("%02d:%02d:%02d", hour,minute,second);
+            }else{
+                str = String.format ("%02d:%02d", minute,second);
+            }
+        }
+        return str;
     }
 }

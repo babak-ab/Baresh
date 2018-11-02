@@ -97,7 +97,7 @@ public class Downloader{
             start = 0;
             end = tmp;
             for (int i = 0;i < 4;i++){
-                mDownloadTask.get(i).setRange((int)start,(int)end);
+                mDownloadTask.get(i).setRange(start,end);
                 start = end + 1;
                 end = start + tmp;
             }
@@ -106,12 +106,12 @@ public class Downloader{
             start = 0;
             end = tmp;
             for (int i = 0;i < 3;i++){
-                mDownloadTask.get(i).setRange((int)start,(int)end);
+                mDownloadTask.get(i).setRange(start,end);
                 start = end + 1;
                 end = start + tmp;
             }
             end = start + mFileSize % 4;
-            mDownloadTask.get(3).setRange((int)start,(int)end);
+            mDownloadTask.get(3).setRange(start,end);
         }
 
         mFile = new File(mFilePath +"/"+ mFileName);
@@ -132,11 +132,9 @@ public class Downloader{
 
     }
 
-
     public URL getUrl(){
         return  mUrl;
     }
-
     public boolean isPartialContent() {
         return mIsPartialContent;
     }
