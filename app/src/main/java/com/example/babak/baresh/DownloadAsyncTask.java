@@ -11,7 +11,7 @@ import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
+public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
 
     private static final String TAG = "MyActivity";
     private Downloader mDownloader;
@@ -29,11 +29,11 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
         mEndByte = endByte;
     }
     @Override
-    protected Integer doInBackground(URL... urls) {
+    protected Integer doInBackground(String... urls) {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         try {
-            urlConnection = (HttpURLConnection) urls[0].openConnection();
+            urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.setRequestProperty("Range","bytes="+mStartByte.toString()+"-"+mEndByte.toString()+"");
             urlConnection.connect();

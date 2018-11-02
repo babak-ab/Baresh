@@ -10,7 +10,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 @SuppressLint("NewApi")
-public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
+public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
 
     private static final String TAG = "MyActivity";
     private Downloader mDownloader;
@@ -21,11 +21,11 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
         mDownloader = downloader;
     }
     @Override
-    protected Integer doInBackground(URL... urls) {
+    protected Integer doInBackground(String... urls) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             try {
-                urlConnection = (HttpURLConnection) urls[0].openConnection();
+                urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
                 urlConnection.setRequestMethod("HEAD");
                 urlConnection.setRequestProperty("Content-Type", "some/type");
                 urlConnection.setRequestProperty("Range","bytes=0-124");
@@ -35,7 +35,7 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
                 if(responseCode == 206){
                     mPartialContent = true;
                     //String Content_Length = urlConnection.getHeaderField("Content-Length");
-                    urlConnection = (HttpURLConnection) urls[0].openConnection();
+                    urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
                     urlConnection.setRequestMethod("HEAD");
                     urlConnection.setRequestProperty("Content-Type", "some/type");
                     urlConnection.connect();

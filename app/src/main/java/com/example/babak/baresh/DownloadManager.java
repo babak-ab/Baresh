@@ -11,18 +11,18 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.concurrent.TimeUnit;
 
 public class DownloadManager extends BaseAdapter implements DownloadInfoDialogListener {
-    private HashMap<Long,Downloader> dataSet;
+    private HashMap<Long,Downloader> mDataSet;
+    private ArrayList<DownloadModel> mDownloadModel;
     private ArrayList<Long> mKeys;
     private DBHelper mdb;
     private DownloadInfoDialog dialog;
     Context mContext;
-
 
     private static class ViewHolder {
         TextView txtName;
@@ -30,57 +30,80 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         TextView txtVersion;
         ImageView info;
     }
-
     public DownloadManager(HashMap<Long,Downloader>  data,Context context){
-        //super(context,R.layout.download_row_layout, data);
         super();
-        this.dataSet = data;
-        this.mContext = context;
-        mdb = new DBHelper(context);
+        mDataSet = data;
+        mContext = context;
         mKeys = new ArrayList<>();
+        mdb = new DBHelper(context);
+        mDownloadModel = mdb.getAllLinks();
+        Iterator itr = mDownloadModel.iterator();
+        while(itr.hasNext()) {
+            DownloadModel model = (DownloadModel) itr.next();
+            Downloader downloader = new Downloader(model,this,mContext);
+            mDataSet.put(model.getDownloadId(),downloader);
+            mKeys.add(model.getDownloadId());
+        }
+        notifyDataSetChanged();
     }
-    public void createDownload(URL url){
-        long id = mdb.insertLink("",url.toString(),"",false);
-        Downloader downloader = new Downloader(id,url,this,mContext);
-        dataSet.put(id,downloader);
+    public boolean createDownload(String url){
+        Iterator itr = mDownloadModel.iterator();
+        while(itr.hasNext()) {
+            DownloadModel model = (DownloadModel) itr.next();
+            if(url.equals(model.getUrl())){
+                return false;
+            }
+        }
+        long id = mdb.insertLink("",url,"",false);
+        DownloadModel model = new DownloadModel();
+        model.setDownloadId(id);
+        model.setUrl(url);
+        Downloader downloader = new Downloader(model,this,mContext);
+        downloader.startHead();
+        mDataSet.put(id,downloader);
         mKeys.add(id);
-        dialog = new DownloadInfoDialog(mContext,id,url.toString());
+        dialog = new DownloadInfoDialog(mContext,id,url);
         dialog.setListener(this);
         dialog.show();
+        return true;
     }
     public void onDownloadAccepted(Long downloadId){
         if(dialog != null)
             dialog.dismiss();
-        dataSet.get(downloadId).setDownloadAccepted(true);
+        mDataSet.get(downloadId).setDownloadAccepted(true);
         notifyDataSetChanged();
     }
 
     @Override
     public void onDownloadReject(Long downloadId) {
         dialog.dismiss();
-        dataSet.remove(downloadId);
+        mDataSet.remove(downloadId);
     }
 
     @Override
     public int getCount() {
-        return dataSet.size();
+        return mDataSet.size();
     }
 
     @Override
     public Object getItem(int i) {
-        return dataSet.get(mKeys.get(i));
+        return mDataSet.get(mKeys.get(i));
     }
 
     @Override
     public long getItemId(int i) {
         return i;
     }
-    public void setFileSize(long mFileSize) {
+    public void onHeadFinished(long downloadId) {
         if(dialog != null){
             if(dialog.isShowing()){
-                dialog.setFileSizeChanged(mFileSize);
+                dialog.setFileSizeChanged(mDataSet.get(downloadId).getFileSize());
             }
         }
+        mdb.updateContact(downloadId,mDataSet.get(downloadId).getFileName(),
+                mDataSet.get(downloadId).getUrl(),"",
+                mDataSet.get(downloadId).isPartialContent());
+        notifyDataSetChanged();
     }
     public void onDownloadSizeChanged() {
         notifyDataSetChanged();

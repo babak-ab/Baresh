@@ -8,7 +8,9 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.support.annotation.Nullable;
 
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class DBHelper extends SQLiteOpenHelper {
 
@@ -16,9 +18,9 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String CONTACTS_TABLE_NAME = "links";
     public static final String CONTACTS_COLUMN_ID = "id";
     public static final String CONTACTS_COLUMN_NAME = "name";
-    public static final String CONTACTS_COLUMN_EMAIL = "address";
-    public static final String CONTACTS_COLUMN_STREET = "resume";
-    public static final String CONTACTS_COLUMN_CITY = "path";
+    public static final String CONTACTS_COLUMN_URL = "url";
+    public static final String CONTACTS_COLUMN_PATH = "path";
+    public static final String CONTACTS_COLUMN_RESUME = "resume";
     public DBHelper(Context context) {
         super(context, DATABASE_NAME , null, 1);
     }
@@ -27,7 +29,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
                 "create table links " +
-                        "(id integer primary key AUTOINCREMENT, name text,address text,path text,resume bool)"
+                        "(id integer primary key AUTOINCREMENT, name text,url text UNIQUE,path text,resume bool)"
         );
     }
 
@@ -40,10 +42,10 @@ public class DBHelper extends SQLiteOpenHelper {
     public long insertLink (String name, String address, String path, Boolean resume) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("name", name);
-        contentValues.put("address", address);
-        contentValues.put("path", path);
-        contentValues.put("resume", resume);
+        contentValues.put(CONTACTS_COLUMN_NAME, name);
+        contentValues.put(CONTACTS_COLUMN_URL, address);
+        contentValues.put(CONTACTS_COLUMN_PATH, path);
+        contentValues.put(CONTACTS_COLUMN_RESUME, String.valueOf(resume));
         long id = db.insert("links", null, contentValues);
         return id;
     }
@@ -60,14 +62,14 @@ public class DBHelper extends SQLiteOpenHelper {
         return numRows;
     }
 
-    public boolean updateContact (Integer id, String name, String address, String path, boolean resume) {
+    public boolean updateContact (Long id, String name, String address, String path, boolean resume) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
-        contentValues.put("name", name);
-        contentValues.put("address", address);
-        contentValues.put("path", path);
-        contentValues.put("resume", resume);
-        db.update("contacts", contentValues, "id = ? ", new String[] { Integer.toString(id) } );
+        contentValues.put(CONTACTS_COLUMN_NAME, name);
+        contentValues.put(CONTACTS_COLUMN_URL, address);
+        contentValues.put(CONTACTS_COLUMN_PATH, path);
+        contentValues.put(CONTACTS_COLUMN_RESUME, resume);
+        db.update("links", contentValues, "id = ? ", new String[] { Long.toString(id) } );
         return true;
     }
 
@@ -78,18 +80,24 @@ public class DBHelper extends SQLiteOpenHelper {
                 new String[] { Integer.toString(id) });
     }
 
-    public ArrayList<String> getAllCotacts() {
-        ArrayList<String> array_list = new ArrayList<String>();
-
-        //hp = new HashMap();
+    public ArrayList<DownloadModel> getAllLinks() {
+        ArrayList<DownloadModel> array_list = new ArrayList<DownloadModel>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from links", null );
         res.moveToFirst();
-
         while(res.isAfterLast() == false){
-            array_list.add(res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME)));
+            String name = res.getString(res.getColumnIndex(CONTACTS_COLUMN_NAME));
+            String id = res.getString(res.getColumnIndex(CONTACTS_COLUMN_ID));
+            String path = res.getString(res.getColumnIndex(CONTACTS_COLUMN_ID));
+            String url = res.getString(res.getColumnIndex(CONTACTS_COLUMN_URL));
+            DownloadModel model = new DownloadModel();
+            model.setDownloadId(Long.parseLong(id));
+            model.setUrl(url);
+            model.setName(name);
+            array_list.add(model);
             res.moveToNext();
         }
+
         return array_list;
     }
 }
