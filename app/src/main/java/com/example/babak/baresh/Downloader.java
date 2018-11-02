@@ -2,15 +2,14 @@ package com.example.babak.baresh;
 
 
 import android.content.Context;
-import android.util.Log;
+import android.os.Environment;
 import android.webkit.MimeTypeMap;
 
+import java.io.File;
 import java.net.FileNameMap;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -18,21 +17,37 @@ public class Downloader{
     private static final String TAG = "MyActivity";
     private HttpAsyncTask headerTask;
     private HashMap<Integer,DownloadAsyncTask> mDownloadTask;
-    private Timer timer;
+    private Timer mTimer;
     private URL mUrl;
     private Long mId;
-    private String fileType;
-    private Boolean isPartialContent;
+    private String mFileType;
+    private Boolean mIsPartialContent;
     private long mFileSize;
     private Context mContext;
     private String mFileName;
     private long mDownloadedSize;
+    private String mFilePath;
+    private File mFile;
     private int mSpeed;
     private int mTime;
+    private int mError;
     private DownloadManager mDownloadManager;
     //DownloadInfoDialog mDownloadDialog;
     public Downloader(Long id,URL url,DownloadManager downloadManager,Context context) {
         headerTask = new HttpAsyncTask(this);
+
+        File dir = new File(Environment.getExternalStorageDirectory() + "/myFolder");
+        boolean succeed;
+        if (!dir.exists()) {
+            succeed = dir.mkdir();
+            if (!succeed) {
+                mError = 1;
+            } else {
+                mFilePath = dir.toString();
+            }
+        }else{
+            mFilePath = dir.toString();
+        }
 
         mDownloadTask = new HashMap<>();
         for(int i = 0;i < 4; i++){
@@ -57,15 +72,15 @@ public class Downloader{
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(url.toString());
         if(mimeType != null){
-            fileType = mimeType;
+            mFileType = mimeType;
         }else{
-            fileType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url.toString()));
+            mFileType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(MimeTypeMap.getFileExtensionFromUrl(url.toString()));
         }
-        if(fileType == null){
-            fileType = "Unknown";
+        if(mFileType == null){
+            mFileType = "Unknown";
         }
         mContext = context;
-        timer = new Timer();
+        mTimer = new Timer();
         header();
     }
     public void header(){
@@ -99,6 +114,8 @@ public class Downloader{
             mDownloadTask.get(3).setRange((int)start,(int)end);
         }
 
+        mFile = new File(mFilePath +"/"+ mFileName);
+
         mDownloadTask.get(0).execute(mUrl);
         mDownloadTask.get(1).execute(mUrl);
         mDownloadTask.get(2).execute(mUrl);
@@ -107,7 +124,7 @@ public class Downloader{
 
         mTime = 0;
         TimerTask speedTask = new DownloadSpeedTask();
-        timer.scheduleAtFixedRate(speedTask, 0, 1000);
+        mTimer.scheduleAtFixedRate(speedTask, 0, 1000);
         //mDownloadTask[4].execute(mUrl);
         //mDownloadTask[5].execute(mUrl);
         //mDownloadTask[6].execute(mUrl);
@@ -121,11 +138,11 @@ public class Downloader{
     }
 
     public boolean isPartialContent() {
-        return isPartialContent;
+        return mIsPartialContent;
     }
 
     public void setPartialContent(boolean partialContent) {
-        this.isPartialContent = partialContent;
+        this.mIsPartialContent = partialContent;
     }
 
     public long getFileSize() {
@@ -136,8 +153,8 @@ public class Downloader{
         mFileSize = fileSize;
         mDownloadManager.setFileSize(mFileSize);
     }
-    public void setFileType(String fileType){
-        this.fileType = fileType;
+    public void setFileType(String mFileType){
+        this.mFileType = mFileType;
     }
 
     public String getFileName() {
@@ -155,7 +172,7 @@ public class Downloader{
     public void onFinishDownload(int taskId){
         mDownloadTask.remove(taskId);
         if(mDownloadTask.size() == 0)
-            timer.cancel();
+            mTimer.cancel();
     }
     public long getDownloadedSize() {
         return mDownloadedSize;
@@ -177,6 +194,10 @@ public class Downloader{
             return (int)mFileSize / mSpeed;
         else
             return 0;
+    }
+
+    public File getFile() {
+        return mFile;
     }
 
     class DownloadSpeedTask extends TimerTask {

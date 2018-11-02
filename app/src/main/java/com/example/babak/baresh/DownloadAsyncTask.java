@@ -10,9 +10,12 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.RandomAccessFile;
 import java.net.FileNameMap;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.ByteBuffer;
+import java.nio.channels.FileChannel;
 import java.time.Instant;
 import java.util.logging.LogManager;
 
@@ -38,16 +41,7 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         try {
-            File folder = new File(Environment.getExternalStorageDirectory() + "/myFolder");
-            boolean succeed;
-            if (!folder.exists()) {
-                succeed = folder.mkdir();
-                if (!succeed) {
-                    Log.i("directory not created", "directory not created");
-                } else {
-                    Log.i("directory created", "directory created");
-                }
-            }
+
             urlConnection = (HttpURLConnection) urls[0].openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.setRequestProperty("Range","bytes="+mStartByte.toString()+"-"+mEndByte.toString()+"");
@@ -63,8 +57,11 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
                 InputStream in = urlConnection.getInputStream();
 
                //File rootDir = Environment.getExternalStorageDirectory();
-               OutputStream output = new FileOutputStream(new File("/sdcard/myFolder/"+String.valueOf(mTaskId)+".extension"));
-
+              // OutputStream output = new FileOutputStream(mDownloader.getFile());
+                RandomAccessFile store = new RandomAccessFile(mDownloader.getFile().getPath(), "rw");
+                store.seek(mStartByte);
+               //FileChannel fileChannel = ((FileOutputStream) output).getChannel();
+               //fileChannel.position(mStartByte);
                 //here’s the download code
                 byte[] buffer = new byte[mEndByte - mStartByte + 1];
                 //byte[] buffer = new byte[1024];
@@ -73,9 +70,12 @@ public class DownloadAsyncTask extends AsyncTask<URL, Integer, Integer> {
                 while ((len1 = in.read(buffer)) > 0) {
                     //total += len1; //total = total + len1
                     publishProgress(len1);
-                    output.write(buffer, 0, len1);
+                   //output.write(buffer, 0, len1);
+                   // fileChannel.write(ByteBuffer.wrap(buffer),len1);
+                    store.write(buffer,0,len1);
                 }
-                output.close();
+                store.close();
+               // output.close();
             }
         } catch (IOException e) {
             Log.e("PlaceholderFragment", "Error ", e);
