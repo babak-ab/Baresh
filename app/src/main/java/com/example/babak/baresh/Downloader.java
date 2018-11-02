@@ -181,7 +181,6 @@ public class Downloader{
     public Long getId() {
         return mId;
     }
-
     public int getSpeed() {
         return mSpeed;
     }
@@ -189,17 +188,14 @@ public class Downloader{
         return mTime;
     }
     public int getDuration() {
-
         if(mSpeed > 0)
-            return (int)mFileSize / mSpeed;
+            return (int) (mFileSize - mDownloadedSize) / mSpeed;
         else
             return 0;
     }
-
     public File getFile() {
         return mFile;
     }
-
     class DownloadSpeedTask extends TimerTask {
         private long prev = 0;
         public void run() {
