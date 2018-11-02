@@ -98,8 +98,9 @@ public class HttpAsyncTask extends AsyncTask<URL, Integer, Integer> {
     }
     @Override
     protected void onPostExecute(Integer integer) {
-        mDownloader.setPartialContent(mPartialContent);
-        mDownloader.setFileSize(mFileSize);
-        mDownloader.setFileName(mFileName);
+        mDownloader.onHeadFinished(mFileName,mFileSize,mPartialContent);
+//        mDownloader.setPartialContent(mPartialContent);
+//        mDownloader.setFileSize(mFileSize);
+//        mDownloader.setFileName(mFileName);
     }
 }

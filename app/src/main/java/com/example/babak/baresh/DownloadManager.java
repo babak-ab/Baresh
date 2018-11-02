@@ -3,11 +3,9 @@ package com.example.babak.baresh;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
@@ -16,9 +14,6 @@ import android.widget.TextView;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class DownloadManager extends BaseAdapter implements DownloadInfoDialogListener {
@@ -56,7 +51,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
     public void onDownloadAccepted(Long downloadId){
         if(dialog != null)
             dialog.dismiss();
-        dataSet.get(downloadId).download();
+        dataSet.get(downloadId).setDownloadAccepted(true);
         notifyDataSetChanged();
     }
 
@@ -116,7 +111,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
 
 
         String duStr = getTimeToString(dataModel.getDuration());
-        String tiStr =  getTimeToString(dataModel.getTime());
+        String tiStr =  getTimeToString(dataModel.getDurationTime());
 
         final TextView duration = (TextView)rowView.findViewById(R.id.duration_textView);
         duration.setText(tiStr + "/" + duStr);

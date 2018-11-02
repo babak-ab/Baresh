@@ -17,7 +17,8 @@ public class Downloader{
     private static final String TAG = "MyActivity";
     private HttpAsyncTask headerTask;
     private HashMap<Integer,DownloadAsyncTask> mDownloadTask;
-    private Timer mTimer;
+    private Timer mTimerSpeed;
+    private Timer mTimerStartDownload;
     private URL mUrl;
     private Long mId;
     private String mFileType;
@@ -29,13 +30,15 @@ public class Downloader{
     private String mFilePath;
     private File mFile;
     private int mSpeed;
-    private int mTime;
+    private int mDurationTime;
     private int mError;
+    private boolean mDownloadHeadFinished;
+    private boolean mDownloadAccepted;
     private DownloadManager mDownloadManager;
-    //DownloadInfoDialog mDownloadDialog;
     public Downloader(Long id,URL url,DownloadManager downloadManager,Context context) {
+        mDownloadHeadFinished = false;
+        mDownloadAccepted = false;
         headerTask = new HttpAsyncTask(this);
-
         File dir = new File(Environment.getExternalStorageDirectory() + "/myFolder");
         boolean succeed;
         if (!dir.exists()) {
@@ -48,23 +51,11 @@ public class Downloader{
         }else{
             mFilePath = dir.toString();
         }
-
         mDownloadTask = new HashMap<>();
         for(int i = 0;i < 4; i++){
             DownloadAsyncTask task = new DownloadAsyncTask(i,this);
             mDownloadTask.put(i,task);
         }
-//        mDownloadTask.pu
-//        mDownloadTask[0] = new DownloadAsyncTask(0,this);
-//        mDownloadTask[1] = new DownloadAsyncTask(1,this);
-//        mDownloadTask[2] = new DownloadAsyncTask(2,this);
-//        mDownloadTask[3] = new DownloadAsyncTask(3,this);
-      //  mDownloadTask[4] = new DownloadAsyncTask(this);
-      //  mDownloadTask[5] = new DownloadAsyncTask(this);
-      //  mDownloadTask[6] = new DownloadAsyncTask(this);
-      //  mDownloadTask[7] = new DownloadAsyncTask(this);
-
-
         mDownloadedSize = 0;
         mDownloadManager = downloadManager;
         mUrl = url;
@@ -80,15 +71,68 @@ public class Downloader{
             mFileType = "Unknown";
         }
         mContext = context;
-        mTimer = new Timer();
-        header();
-    }
-    public void header(){
+        mTimerSpeed = new Timer();
+        mTimerStartDownload = new Timer();
+        TimerTask downloadTask = new StartDownloadTask();
+        mTimerStartDownload.scheduleAtFixedRate(downloadTask, 0, 100);
         headerTask.execute(mUrl);
     }
+    public void setDownloadAccepted(boolean accepted) {
+        mDownloadAccepted = accepted;
+        if(mDownloadAccepted == false)
+            mTimerStartDownload.cancel();
+    }
 
-    public void download() {
-
+    public URL getUrl(){
+        return  mUrl;
+    }
+    public boolean isPartialContent() {
+        return mIsPartialContent;
+    }
+    public long getFileSize() {
+        return mFileSize;
+    }
+    public String getFileName() {
+        return mFileName;
+    }
+    public long getDownloadedSize() {
+        return mDownloadedSize;
+    }
+    public Long getId() {
+        return mId;
+    }
+    public int getSpeed() {
+        return mSpeed;
+    }
+    public int getDurationTime() {
+        return mDurationTime;
+    }
+    public int getDuration() {
+        if(mSpeed > 0)
+            return (int) (mFileSize - mDownloadedSize) / mSpeed;
+        else
+            return 0;
+    }
+    public File getFile() {
+        return mFile;
+    }
+    public void onDownloadedSizeChanged(long downloadedSize){
+        mDownloadedSize += downloadedSize;
+        mDownloadManager.onDownloadSizeChanged();
+    }
+    public void onHeadFinished(String fileName, long fileSize, boolean partialContent){
+        mDownloadHeadFinished = true;
+        mFileName = fileName;
+        mFileSize = fileSize;
+        mIsPartialContent = partialContent;
+        mDownloadManager.setFileSize(mFileSize);
+    }
+    public void onDownloadFinished(int taskId){
+        mDownloadTask.remove(taskId);
+        if(mDownloadTask.size() == 0)
+            mTimerSpeed.cancel();
+    }
+    private void startDownload() {
         long tmp;
         long start;
         long end;
@@ -121,85 +165,24 @@ public class Downloader{
         mDownloadTask.get(2).execute(mUrl);
         mDownloadTask.get(3).execute(mUrl);
 
-
-        mTime = 0;
+        mDurationTime = 0;
         TimerTask speedTask = new DownloadSpeedTask();
-        mTimer.scheduleAtFixedRate(speedTask, 0, 1000);
-        //mDownloadTask[4].execute(mUrl);
-        //mDownloadTask[5].execute(mUrl);
-        //mDownloadTask[6].execute(mUrl);
-        //mDownloadTask[7].execute(mUrl);
-
+        mTimerSpeed.scheduleAtFixedRate(speedTask, 0, 1000);
     }
-
-    public URL getUrl(){
-        return  mUrl;
-    }
-    public boolean isPartialContent() {
-        return mIsPartialContent;
-    }
-
-    public void setPartialContent(boolean partialContent) {
-        this.mIsPartialContent = partialContent;
-    }
-
-    public long getFileSize() {
-        return mFileSize;
-    }
-
-    public void setFileSize(long fileSize) {
-        mFileSize = fileSize;
-        mDownloadManager.setFileSize(mFileSize);
-    }
-    public void setFileType(String mFileType){
-        this.mFileType = mFileType;
-    }
-
-    public String getFileName() {
-        return mFileName;
-    }
-
-    public void setFileName(String fileName) {
-        this.mFileName = fileName;
-    }
-
-    public void setDownloadedSize(long downloadedSize){
-        mDownloadedSize += downloadedSize;
-        mDownloadManager.onDownloadSizeChanged();
-    }
-    public void onFinishDownload(int taskId){
-        mDownloadTask.remove(taskId);
-        if(mDownloadTask.size() == 0)
-            mTimer.cancel();
-    }
-    public long getDownloadedSize() {
-        return mDownloadedSize;
-    }
-
-    public Long getId() {
-        return mId;
-    }
-    public int getSpeed() {
-        return mSpeed;
-    }
-    public int getTime() {
-        return mTime;
-    }
-    public int getDuration() {
-        if(mSpeed > 0)
-            return (int) (mFileSize - mDownloadedSize) / mSpeed;
-        else
-            return 0;
-    }
-    public File getFile() {
-        return mFile;
+    class StartDownloadTask extends TimerTask {
+        public void run() {
+            if(mDownloadAccepted && mDownloadHeadFinished){
+                mTimerStartDownload.cancel();
+                startDownload();
+            }
+        }
     }
     class DownloadSpeedTask extends TimerTask {
         private long prev = 0;
         public void run() {
             mSpeed = (int)(mDownloadedSize - prev);
             prev = mDownloadedSize;
-            mTime++;
+            mDurationTime++;
         }
     }
 }
