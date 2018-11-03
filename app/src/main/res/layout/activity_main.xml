@@ -14,15 +14,19 @@
         android:elevation="4dp"
         />
 
-    <Button
-        android:id="@+id/button"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Button" />
+    <!--<Button-->
+        <!--android:id="@+id/button"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:text="Button" />-->
 
     <ListView
         android:id="@+id/listView"
         android:layout_width="match_parent"
+        android:focusable="false"
+        android:descendantFocusability="blocksDescendants"
+        android:focusableInTouchMode="false"
+        android:clickable="true"
         android:layout_height="match_parent" />
     <!-- Layout for content is here. This can be a RelativeLayout  -->
 

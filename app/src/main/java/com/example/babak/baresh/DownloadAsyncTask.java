@@ -17,6 +17,7 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     private Downloader mDownloader;
     private Long mStartByte;
     private Long mEndByte;
+    private Long mLastByte;
     private Integer mTaskId;
     File rootDir = Environment.getExternalStorageDirectory();
 
@@ -45,22 +46,26 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
                 store.seek(mStartByte);
                 byte[] buffer = new byte[1024];
                 int len1 = 0;
-                int total = 0;
+                long total = 0;
                 while ((len1 = in.read(buffer)) > 0) {
+                    total += len1;
                     publishProgress(len1);
-                   store.write(buffer,0,len1);
+                    store.write(buffer,0,len1);
+                    mStartByte = mStartByte + total;
+                    if (isCancelled())
+                        break;
                 }
                store.close();
             }
         } catch (IOException e) {
             Log.e("PlaceholderFragment", "Error ", e);
-            return null;
+            return -1;
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
         }
-        return 1;
+        return 0;
     }
     @Override
     protected void onPostExecute(Integer result) {
@@ -70,5 +75,10 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     protected void onProgressUpdate(Integer... progress) {
         super.onProgressUpdate(progress);
         mDownloader.onDownloadedSizeChanged(progress[0]);
+    }
+
+    protected void onCancelled() {
+        super.onCancelled();
+        Log.e("PlaceholderFragment", "onCancelled ");
     }
 }

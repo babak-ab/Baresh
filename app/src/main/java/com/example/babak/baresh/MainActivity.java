@@ -9,9 +9,11 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -40,63 +42,43 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         mContext = getApplicationContext();
         mLinearLayout = (LinearLayout) findViewById(R.id.activity_main_ll);
-//        Typeface fontAwesomeFont = Typeface.createFromAsset(getAssets(), "fonts/fontawesome-webfont.ttf");
-//        TextView fontAwesomeAndroidIcon = (TextView) findViewById(R.id.font_awesome_android_icon);
-//        TextView fontAwesomeAreaChartIcon = (TextView) findViewById(R.id.font_awesome_area_chart_icon);
-//        TextView fontAwesomeCubesIcon = (TextView) findViewById(R.id.font_awesome_cubes_icon);
-//        TextView fontAwesomeMobilePhoneIcon = (TextView) findViewById(R.id.font_awesome_mobile_phone_icon);
-//
-//        fontAwesomeAndroidIcon.setTypeface(fontAwesomeFont);
-//        fontAwesomeAreaChartIcon.setTypeface(fontAwesomeFont);
-//        fontAwesomeCubesIcon.setTypeface(fontAwesomeFont);
-//        fontAwesomeMobilePhoneIcon.setTypeface(fontAwesomeFont);
-
-        // new HttpAsyncTask().execute();
-        //HttpAsyncTask task = new HttpAsyncTask();
-        //String[] params = new String[2];
-        //task.execute();
-
-       // mButton = (Button) findViewById(R.id.);
-
         isStoragePermissionGranted();
-
-        ListView l = (ListView) findViewById(R.id.listView);
+        ListView listView = (ListView) findViewById(R.id.listView);
         dataModels = new HashMap<>();
         mDownloadManager = new DownloadManager(dataModels,this);
-        l.setAdapter(mDownloadManager);
-
-
-
-        button = (Button) findViewById(R.id.button);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View arg0) {
+        listView.setAdapter(mDownloadManager);
+        listView.setItemsCanFocus(false);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                //Toast.makeText(getApplicationContext(), ((TextView) view).getText(), Toast.LENGTH_SHORT).show();
+                Downloader data = (Downloader) parent.getItemAtPosition(position);
+                Log.e("PlaceholderFragment", String.valueOf(position));
+                if(data.isPause())
+                    data.setPause(true);
+                else
+                    data.setPause(false);
             }
         });
-
     }
-    // Menu icons are inflated just as they were with actionbar
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
-            // action with ID action_refresh was selected
             case R.id.action_add:
                 final Dialog dialog = new Dialog(MainActivity.this);
                 dialog.setContentView(R.layout.add_dialog_layout);
                 dialog.setTitle("Add link for download...");
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
                // text.setText("http://techslides.com/demos/sample-videos/small.mp4");
-                //text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
+                text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
                 //text.setText("http://ipv4.download.thinkbroadband.com/1GB.zip");
                 //text.setText("https://speed.hetzner.de/10GB.bin");
                 //https://speed.hetzner.de/10GB.bin
-                text.setText("http://dl.hastidl.me/data/Friends.S01.E03.Hastidl.mkv");
+                //text.setText("http://dl.hastidl.me/data/Friends.S01.E03.Hastidl.mkv");
                 //text.setText("https://host2.rjmusicmedia.com/media/podcast/mp3-192/Abo-Atash-109.mp3");
                 //text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
                 Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
@@ -135,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
                 ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, 1);
                 return false;
             }
-        } else { //permission is automatically granted on sdk<23 upon installation
+        } else {
             return true;
         }
     }

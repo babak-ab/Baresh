@@ -108,15 +108,20 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
     public void onDownloadSizeChanged() {
         notifyDataSetChanged();
     }
-
+    public void onDownloadFinished(Long downloadId) {
+        notifyDataSetChanged();
+    }
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        final Downloader dataModel = (Downloader)getItem(position);
+
         View rowView = inflater.inflate(R.layout.download_row_layout, parent, false);
+
         final ImageView imageView = (ImageView) rowView.findViewById(R.id.imageView);
-        Downloader dataModel = (Downloader)getItem(position);
+
         final TextView fileName = (TextView) rowView.findViewById(R.id.fileName_textView) ;
         fileName.setText(dataModel.getFileName());
 
@@ -133,7 +138,13 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
                 getSizeToString(dataModel.getFileSize()));
 
 
-        String duStr = getTimeToString(dataModel.getDuration());
+        String duStr;
+        long time = dataModel.getRemindTime();
+        if(time == 0){
+             duStr = "--:--";
+        }else{
+             duStr = getTimeToString(time);
+        }
         String tiStr =  getTimeToString(dataModel.getDurationTime());
 
         final TextView duration = (TextView)rowView.findViewById(R.id.duration_textView);
