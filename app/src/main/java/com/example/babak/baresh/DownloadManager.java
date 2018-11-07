@@ -97,9 +97,14 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
 
     @Override
     public void onDownloadReject(Long downloadId) {
-        dialog.dismiss();
+        if(dialog != null)
+            dialog.dismiss();
         mDownloadRejected = true;
-        //mDataSet.remove(downloadId);
+        for (Map.Entry<Long,TaskModel> entry : mDataSet.get(downloadId).getTasksModel().entrySet()) {
+            mdb.deleteTask(entry.getKey());
+        }
+        mdb.deleteLink(mCreateDownloadId);
+        mDataSet.remove(downloadId);
     }
     public void onHeadFinished(long downloadId) {
         mHeadFinished = true;
@@ -294,7 +299,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
             mdb.updateLink(mCreateDownloadId, mDataSet.get(mCreateDownloadId).getFileName(),
                     mDataSet.get(mCreateDownloadId).getUrl(), mDataSet.get(mCreateDownloadId).getFile().getAbsolutePath());
             mHeadAsyncTask = null;
-            mdb.deleteLink(mCreateDownloadId);
+            //mdb.deleteLink(mCreateDownloadId);
             notifyDataSetChanged();
         }
     }

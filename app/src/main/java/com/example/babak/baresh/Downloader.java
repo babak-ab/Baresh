@@ -30,7 +30,7 @@ public class Downloader{
     private String mFileType;
     private Boolean mIsPartialContent;
 
-    private long mDownloadedSize;
+   // private long mDownloadedSize;
     private String mFilePath;
     private File mFile;
     private long mSpeed;
@@ -66,7 +66,7 @@ public class Downloader{
         }
         mDownloadTask = new HashMap<>();
 
-        mDownloadedSize = 0;
+        //mDownloadedSize = 0;
         mDownloadManager = downloadManager;
         FileNameMap fileNameMap = URLConnection.getFileNameMap();
         String mimeType = fileNameMap.getContentTypeFor(mDownloadModel.getUrl());
@@ -105,7 +105,7 @@ public class Downloader{
         return mDownloadModel.getName();
     }
     public long getDownloadedSize() {
-        return mDownloadedSize;
+        return mDownloadModel.getDownloaded();
     }
     public long getDownloadId() {
         return mDownloadModel.getDownloadId();
@@ -118,7 +118,7 @@ public class Downloader{
     }
     public long getRemindTime() {
         if(mSpeed > 0)
-            return (mDownloadModel.getFileSize() - mDownloadedSize) / mSpeed;
+            return (mDownloadModel.getFileSize() - getDownloadedSize()) / mSpeed;
         else
             return 0;
     }
@@ -142,7 +142,7 @@ public class Downloader{
           }
     }
     public void onDownloadedSizeChanged(long downloadedSize){
-        mDownloadedSize += downloadedSize;
+        mDownloadModel.setDownloaded(mDownloadModel.getDownloaded() + downloadedSize);
         ///mDownloadManager.onDownloadSizeChanged();
     }
 //    public void onHeadFinished(String fileName, long fileSize, boolean partialContent){
@@ -182,8 +182,8 @@ public class Downloader{
         public void run() {
             if((mDurationTime % 1000) == 0)
             {
-                mSpeed =  (mDownloadedSize - prev);
-                prev = mDownloadedSize;
+                mSpeed =  (getDownloadedSize() - prev);
+                prev = getDownloadedSize();
                 Log.e("DownloadSpeedTask", String.valueOf(mSpeed));
             }
             ((Activity) mContext).runOnUiThread(new Runnable() {

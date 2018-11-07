@@ -8,7 +8,6 @@ public class DownloadModel {
     private String mName;
     private String mFile;
     private Long mFileSize;
-    private Long mSize;
     private Long mDownloaded;
     public String getUrl() {
         return mUrl;
@@ -47,14 +46,6 @@ public class DownloadModel {
 
     public void setFileSize(Long mFileSize) {
         this.mFileSize = mFileSize;
-    }
-
-    public Long getSize() {
-        return mSize;
-    }
-
-    public void setSize(Long mSize) {
-        this.mSize = mSize;
     }
 
     public Long getDownloaded() {

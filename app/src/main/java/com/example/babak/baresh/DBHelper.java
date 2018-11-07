@@ -127,7 +127,12 @@ public class DBHelper extends SQLiteOpenHelper {
                 "id = ? ",
                 new String[] {String.valueOf(id)});
     }
-
+    public Integer deleteTask (Long id) {
+        SQLiteDatabase db = this.getWritableDatabase();
+        return db.delete("tasks",
+                "id = ? ",
+                new String[] {String.valueOf(id)});
+    }
     public ArrayList<DownloadModel> getAllLinks() {
         ArrayList<DownloadModel> array_list = new ArrayList<DownloadModel>();
         SQLiteDatabase db = this.getReadableDatabase();
@@ -145,7 +150,7 @@ public class DBHelper extends SQLiteOpenHelper {
             model.setUrl(url);
             model.setName(name);
             model.setFile(file);
-            model.setSize(Long.parseLong(size));
+            model.setFileSize(Long.parseLong(size));
             model.setDownloaded(Long.parseLong(downloaded));
             array_list.add(model);
             res.moveToNext();
