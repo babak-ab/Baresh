@@ -49,8 +49,17 @@ public class DownloadInfoDialog extends Dialog{
         editText.setText(urlString);
         //spinner.setAdapter(new GroupsArrayAdapter(MainActivity.this, categories.toArray(new String[0])));
 
-        final Button button = (Button)this.findViewById(R.id.button_downloadInfoStart);
-        button.setOnClickListener(new View.OnClickListener() {
+        final Button button_start = (Button)this.findViewById(R.id.button_downloadInfoStart);
+        button_start.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View arg0) {
+                mListener.onDownloadAccepted(mDownloadId);
+                //DownloadInfoDialog.this.dismiss();
+            }
+        });
+
+        final Button button_cancel = (Button)this.findViewById(R.id.button_downloadInfoCancel);
+        button_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
                 mListener.onDownloadAccepted(mDownloadId);

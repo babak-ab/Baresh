@@ -18,14 +18,11 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     private Long mStartByte;
     private Long mEndByte;
     private Long mLastByte;
-    private Integer mTaskId;
+    private long mTaskId;
     File rootDir = Environment.getExternalStorageDirectory();
-
-    public DownloadAsyncTask(int taskId,Downloader downloader) {
+    public DownloadAsyncTask(long taskId,Long startByte,Long endByte,Downloader downloader) {
         mDownloader = downloader;
         mTaskId = taskId;
-    }
-    public void setRange(Long startByte,Long endByte){
         mStartByte = startByte;
         mEndByte = endByte;
     }
@@ -72,13 +69,35 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
         super.onPostExecute(result);
         mDownloader.onDownloadFinished(mTaskId);
     }
+    @Override
     protected void onProgressUpdate(Integer... progress) {
         super.onProgressUpdate(progress);
         mDownloader.onDownloadedSizeChanged(progress[0]);
     }
-
+    @Override
+    protected void onPreExecute() {
+        super.onPreExecute();
+        mDownloader.onDownloadStarted(mTaskId,this);
+    }
+    @Override
     protected void onCancelled() {
         super.onCancelled();
-        Log.e("PlaceholderFragment", "onCancelled ");
+        mDownloader.onDownloadCancel(mTaskId);
+        //Log.e("PlaceholderFragment", "onCancelled ");
+    }
+
+    public void setStartByte(Long startByte) {
+        mStartByte = mStartByte;
+    }
+
+    public void setEndByte(Long endByte){
+        mEndByte = endByte;
+    }
+
+    public Long getStartByte() {
+        return mStartByte;
+    }
+    public Long getEndByte(){
+        return mEndByte;
     }
 }

@@ -1,8 +1,10 @@
 package com.example.babak.baresh;
 
+import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,16 +16,25 @@ import android.widget.TextView;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class DownloadManager extends BaseAdapter implements DownloadInfoDialogListener {
     private HashMap<Long,Downloader> mDataSet;
+    //private HashMap<Long,HttpAsyncTask> mHeadAsyncTasks;
     private ArrayList<DownloadModel> mDownloadModel;
     private ArrayList<Long> mKeys;
     private DBHelper mdb;
     private DownloadInfoDialog dialog;
-    Context mContext;
-
+    private Context mContext;
+    private Integer mNumberOnThread;
+    private HttpAsyncTask mHeadAsyncTask;
+    private boolean mDownloadAccepted;
+    private boolean mDownloadRejected;
+    private boolean mHeadFinished;
+    private Long mCreateDownloadId;
     private static class ViewHolder {
         TextView txtName;
         TextView txtType;
@@ -34,52 +45,93 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         super();
         mDataSet = data;
         mContext = context;
+        mNumberOnThread = 4;
         mKeys = new ArrayList<>();
         mdb = new DBHelper(context);
         mDownloadModel = mdb.getAllLinks();
+        mDownloadAccepted = false;
+        mDownloadRejected = false;
+        mHeadFinished = false;
+
         Iterator itr = mDownloadModel.iterator();
         while(itr.hasNext()) {
             DownloadModel model = (DownloadModel) itr.next();
-            Downloader downloader = new Downloader(model,this,mContext);
+            Downloader downloader = new Downloader(model,mdb.getAllTasks(model.getDownloadId()),
+                    this,mContext);
             mDataSet.put(model.getDownloadId(),downloader);
             mKeys.add(model.getDownloadId());
         }
         notifyDataSetChanged();
     }
     public boolean createDownload(String url){
-        Iterator itr = mDownloadModel.iterator();
-        while(itr.hasNext()) {
-            DownloadModel model = (DownloadModel) itr.next();
-            if(url.equals(model.getUrl())){
-                return false;
-            }
-        }
-        long id = mdb.insertLink("",url,"",false);
-        DownloadModel model = new DownloadModel();
-        model.setDownloadId(id);
-        model.setUrl(url);
-        Downloader downloader = new Downloader(model,this,mContext);
-        downloader.startHead();
-        mDataSet.put(id,downloader);
-        mKeys.add(id);
-        dialog = new DownloadInfoDialog(mContext,id,url);
+        mCreateDownloadId = mdb.insertLink("",url,"",0,0);
+        mHeadAsyncTask = new HttpAsyncTask(this,mCreateDownloadId);
+        mHeadAsyncTask.execute(url);
+
+        mDownloadAccepted = false;
+        mDownloadRejected = false;
+        mHeadFinished = false;
+
+        dialog = new DownloadInfoDialog(mContext,mCreateDownloadId,url);
         dialog.setListener(this);
         dialog.show();
+
         return true;
+    }
+    public void removeDownload(long downloadId){
+        mdb.deleteLink(downloadId);
+        mHeadAsyncTask = null;
+        mdb.deleteLink(mCreateDownloadId);
+        Downloader downloader = mDataSet.remove(downloadId);
+        downloader = null;
+        notifyDataSetChanged();
     }
     public void onDownloadAccepted(Long downloadId){
         if(dialog != null)
             dialog.dismiss();
-        mDataSet.get(downloadId).setDownloadAccepted(true);
-        notifyDataSetChanged();
+        //mDataSet.get(downloadId).setDownloadAccepted(true);
+        //notifyDataSetChanged();
+        mDownloadAccepted = true;
+        completeCreateLink();
     }
 
     @Override
     public void onDownloadReject(Long downloadId) {
         dialog.dismiss();
-        mDataSet.remove(downloadId);
+        mDownloadRejected = true;
+        //mDataSet.remove(downloadId);
     }
-
+    public void onHeadFinished(long downloadId) {
+        mHeadFinished = true;
+        if(dialog != null){
+            if(dialog.isShowing()){
+                dialog.setFileSizeChanged(mHeadAsyncTask.getFileSize());
+            }
+        }
+        completeCreateLink();
+    }
+    public void onDownloadSizeChanged() {
+        notifyDataSetChanged();
+    }
+    public void onDownloadFinished(Long downloadId) {
+        notifyDataSetChanged();
+    }
+    public void onDownloadPause(Long downloadId) {
+        mdb.updateDownloadedLink(downloadId,mDataSet.get(downloadId).getDownloadedSize());
+        HashMap<Long,TaskModel> tasks = mDataSet.get(downloadId).getTasksModel();
+        for (Map.Entry<Long,TaskModel> entry : tasks.entrySet()) {
+            mdb.updateTask(entry.getKey(),
+                    entry.getValue().getStart(),entry.getValue().getEnd());
+        }
+//        for(int i = 0;i < tasks.size(); i++){
+//            mdb.updateTask(tasks.get(i).getTaskId(),
+//                    tasks.get(i).getStart(),tasks.get(i).getEnd());
+//        }
+        notifyDataSetChanged();
+    }
+    public void onDownloadStart(Long downloadId) {
+        notifyDataSetChanged();
+    }
     @Override
     public int getCount() {
         return mDataSet.size();
@@ -94,23 +146,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
     public long getItemId(int i) {
         return i;
     }
-    public void onHeadFinished(long downloadId) {
-        if(dialog != null){
-            if(dialog.isShowing()){
-                dialog.setFileSizeChanged(mDataSet.get(downloadId).getFileSize());
-            }
-        }
-        mdb.updateContact(downloadId,mDataSet.get(downloadId).getFileName(),
-                mDataSet.get(downloadId).getUrl(),"",
-                mDataSet.get(downloadId).isPartialContent());
-        notifyDataSetChanged();
-    }
-    public void onDownloadSizeChanged() {
-        notifyDataSetChanged();
-    }
-    public void onDownloadFinished(Long downloadId) {
-        notifyDataSetChanged();
-    }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
@@ -121,7 +157,11 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         View rowView = inflater.inflate(R.layout.download_row_layout, parent, false);
 
         final ImageView imageView = (ImageView) rowView.findViewById(R.id.imageView);
-
+        if(dataModel.getStatus() == Downloader.Status.PAUSE){
+            imageView.setImageResource(android.R.drawable.ic_media_pause);
+        }else if(dataModel.getStatus() == Downloader.Status.RUNNING){
+            imageView.setImageResource(android.R.drawable.ic_media_play);
+        }
         final TextView fileName = (TextView) rowView.findViewById(R.id.fileName_textView) ;
         fileName.setText(dataModel.getFileName());
 
@@ -141,7 +181,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         String duStr;
         long time = dataModel.getRemindTime();
         if(time == 0){
-             duStr = "--:--";
+             duStr = "--:--:--";
         }else{
              duStr = getTimeToString(time);
         }
@@ -150,12 +190,12 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         final TextView duration = (TextView)rowView.findViewById(R.id.duration_textView);
         duration.setText(tiStr + "/" + duStr);
 
-        imageView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                imageView.setImageResource(android.R.drawable.ic_media_pause);
-            }
-        });
+//        imageView.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                imageView.setImageResource(android.R.drawable.ic_media_pause);
+//            }
+//        });
         return rowView;
     }
     public String getSizeToString(long size){
@@ -201,4 +241,62 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         }
         return str;
     }
+    private void completeCreateLink(){
+        if (mDownloadAccepted && mHeadFinished) {
+            DownloadModel model = new DownloadModel();
+            model.setDownloadId(mCreateDownloadId);
+            model.setUrl(mHeadAsyncTask.getUrl());
+            model.setName(mHeadAsyncTask.getFileName());
+            model.setFileSize(mHeadAsyncTask.getFileSize());
+            HashMap<Long,TaskModel> task_list = new HashMap<>(4);
+            long tmp;
+            long start;
+            long end;
+            if (model.getFileSize() % 4 == 0) {
+                tmp = (model.getFileSize() / 4) - 1;
+                start = 0;
+                end = tmp;
+                for (int i = 0; i < 4; i++) {
+                    long taskId = mdb.insertTask(mCreateDownloadId,start,end);
+                    TaskModel task = new TaskModel();
+                    task.setStart(start);
+                    task.setEnd(end);
+                    task_list.put(taskId,task);
+                    start = end + 1;
+                    end = start + tmp;
+                }
+            } else {
+                tmp = (model.getFileSize() / 3) - 1;
+                start = 0;
+                end = tmp;
+                for (int i = 0; i < 3; i++) {
+                    long taskId = mdb.insertTask(mCreateDownloadId,start,end);
+                    TaskModel task = new TaskModel();
+                    task.setStart(start);
+                    task.setEnd(end);
+                    task_list.put(taskId,task);
+                    start = end + 1;
+                    end = start + tmp;
+                }
+                end = start + model.getFileSize() % 4;
+                //task_list.get(3).setStart(start);
+                //task_list.get(3).setEnd(end);
+                long taskId = mdb.insertTask(mCreateDownloadId,start,end);
+                TaskModel task = new TaskModel();
+                task.setStart(start);
+                task.setEnd(end);
+                task_list.put(taskId,task);
+            }
+            Downloader downloader = new Downloader(model, task_list, this, mContext);
+            mDataSet.put(mCreateDownloadId, downloader);
+            mKeys.add(mCreateDownloadId);
+            mdb.updateSizeLink(mCreateDownloadId, mHeadAsyncTask.getFileSize());
+            mdb.updateLink(mCreateDownloadId, mDataSet.get(mCreateDownloadId).getFileName(),
+                    mDataSet.get(mCreateDownloadId).getUrl(), mDataSet.get(mCreateDownloadId).getFile().getAbsolutePath());
+            mHeadAsyncTask = null;
+            mdb.deleteLink(mCreateDownloadId);
+            notifyDataSetChanged();
+        }
+    }
+
 }

@@ -13,18 +13,23 @@ import java.net.URL;
 public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
 
     private static final String TAG = "MyActivity";
-    private Downloader mDownloader;
-    private Boolean mPartialContent = false;
+    private DownloadManager mDownloadManager;
+    private Long mDownloadId;
+    private Boolean mPartialContent;
     private long mFileSize;
     private String mFileName;
-    public HttpAsyncTask(Downloader downloader) {
-        mDownloader = downloader;
+    private String mUrl;
+    public HttpAsyncTask(DownloadManager downloadManager,Long downloadId) {
+        mDownloadManager = downloadManager;
+        mDownloadId = downloadId;
+        mPartialContent = false;
     }
     @Override
     protected Integer doInBackground(String... urls) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             try {
+                mUrl = urls[0];
                 urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
                 urlConnection.setRequestMethod("HEAD");
                 urlConnection.setRequestProperty("Content-Type", "some/type");
@@ -98,9 +103,21 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
     }
     @Override
     protected void onPostExecute(Integer integer) {
-        mDownloader.onHeadFinished(mFileName,mFileSize,mPartialContent);
+        mDownloadManager.onHeadFinished(mDownloadId);
 //        mDownloader.setPartialContent(mPartialContent);
 //        mDownloader.setFileSize(mFileSize);
 //        mDownloader.setFileName(mFileName);
+    }
+
+    public long getFileSize() {
+        return mFileSize;
+    }
+
+    public String getFileName() {
+        return mFileName;
+    }
+
+    public String getUrl() {
+        return mUrl;
     }
 }

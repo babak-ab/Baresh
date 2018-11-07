@@ -1,8 +1,10 @@
 package com.example.babak.baresh;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.v4.app.ActivityCompat;
@@ -12,6 +14,7 @@ import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
@@ -34,7 +37,6 @@ public class MainActivity extends AppCompatActivity {
     private Downloader download;
     private DownloadManager mDownloadManager;
     private HashMap<Long,Downloader> dataModels;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -53,12 +55,38 @@ public class MainActivity extends AppCompatActivity {
                 //Toast.makeText(getApplicationContext(), ((TextView) view).getText(), Toast.LENGTH_SHORT).show();
                 Downloader data = (Downloader) parent.getItemAtPosition(position);
                 Log.e("PlaceholderFragment", String.valueOf(position));
-                if(data.isPause())
-                    data.setPause(true);
+                if(data.getStatus() == Downloader.Status.PAUSE)
+                    data.startDownload();
                 else
-                    data.setPause(false);
+                   data.stopDownload();
             }
         });
+        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
+            @Override
+            public boolean onItemLongClick(final AdapterView<?> adapterView, View view, final int position, long id) {
+                //Log.e("PlaceholderFragment","HOLD");
+                String[] animals = {"Delete Link"};
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle("Title")
+                        .setItems(animals, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                switch (i) {
+                                    case 0: // horse
+                                        Downloader data = (Downloader) adapterView.getItemAtPosition(position);
+                                        mDownloadManager.removeDownload(data.getDownloadId());
+                                        break;
+                                }
+                            }
+                        })
+                        .create()
+                        .show();
+                // IF false -> call onItemClick in Item Click Release
+                return true;
+            }
+        });
+
+
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -120,5 +148,9 @@ public class MainActivity extends AppCompatActivity {
         } else {
             return true;
         }
+    }
+    @Override
+    protected void onPause() {
+        super.onPause();
     }
 }

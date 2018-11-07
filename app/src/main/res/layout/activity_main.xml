@@ -27,6 +27,7 @@
         android:descendantFocusability="blocksDescendants"
         android:focusableInTouchMode="false"
         android:clickable="true"
+        android:longClickable="true"
         android:layout_height="match_parent" />
     <!-- Layout for content is here. This can be a RelativeLayout  -->
 
