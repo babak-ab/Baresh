@@ -3,6 +3,7 @@ package com.example.babak.baresh;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -92,7 +93,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         //mDataSet.get(downloadId).setDownloadAccepted(true);
         //notifyDataSetChanged();
         mDownloadAccepted = true;
-        createlinkcomelete();
+        checkCreateLinkAccepted();
     }
 
     @Override
@@ -113,7 +114,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
                 dialog.setFileSizeChanged(mHeadAsyncTask.getFileSize());
             }
         }
-        createlinkcomelete();
+        checkCreateLinkAccepted();
     }
     public void onDownloadSizeChanged() {
         notifyDataSetChanged();
@@ -185,10 +186,10 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
 
         String duStr;
         long time = dataModel.getRemindTime();
-        if(time == 0){
+        if(time == -1){
              duStr = "--:--:--";
         }else{
-             duStr = getTimeToString(time);
+             duStr = getTimeToString((Long) time);
         }
         String tiStr =  getTimeToString(dataModel.getDurationTime());
 
@@ -246,7 +247,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         }
         return str;
     }
-    private void createlinkcomelete(){
+    private void checkCreateLinkAccepted(){
         if (mDownloadAccepted && mHeadFinished) {
             DownloadModel model = new DownloadModel();
             model.setDownloadId(mCreateDownloadId);
