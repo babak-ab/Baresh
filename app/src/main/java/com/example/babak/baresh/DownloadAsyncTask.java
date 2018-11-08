@@ -45,12 +45,12 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
                 int len1 = 0;
                 long total = 0;
                 while ((len1 = in.read(buffer)) > 0) {
-                    total += len1;
-                    publishProgress(len1);
-                    store.write(buffer,0,len1);
-                    mStartByte = mStartByte + total;
                     if (isCancelled())
                         break;
+                    total += len1;
+                    mStartByte = mStartByte + len1;
+                    publishProgress(len1);
+                    store.write(buffer,0,len1);
                 }
                store.close();
             }
@@ -72,6 +72,7 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     @Override
     protected void onProgressUpdate(Integer... progress) {
         super.onProgressUpdate(progress);
+       // Log.e("PlaceholderFragment", "onProgressUpdate " + progress[0]);
         mDownloader.onDownloadedSizeChanged(progress[0]);
     }
     @Override
@@ -83,9 +84,8 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     protected void onCancelled() {
         super.onCancelled();
         mDownloader.onDownloadCancel(mTaskId);
-        //Log.e("PlaceholderFragment", "onCancelled ");
+        Log.e("PlaceholderFragment", "onCancelled " + mStartByte);
     }
-
     public void setStartByte(Long startByte) {
         mStartByte = mStartByte;
     }
@@ -97,6 +97,7 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     public Long getStartByte() {
         return mStartByte;
     }
+
     public Long getEndByte(){
         return mEndByte;
     }

@@ -18,12 +18,9 @@ import java.util.TimerTask;
 
 public class Downloader{
     private static final String TAG = "MyActivity";
-
-
     enum Status{
         STOP,RUNNING,PAUSE,FINISH
     }
-
     private HashMap<Long,DownloadAsyncTask> mDownloadTask;
     private Timer mTimerUpdate;
     private TimerTask mSpeedTask;
@@ -118,7 +115,7 @@ public class Downloader{
     }
     public long getRemindTime() {
         if(mSpeed > 0)
-            return (mDownloadModel.getFileSize() - getDownloadedSize()) / mSpeed;
+            return (mDownloadModel.getFileSize() - mDownloadModel.getDownloaded()) / mSpeed;
         else
             return 0;
     }
@@ -129,9 +126,9 @@ public class Downloader{
         mTasksModel.get(taskId).setStart(mDownloadTask.get(taskId).getStartByte());
         mDownloadTask.remove(taskId);
         if(mDownloadTask.size() == 0) {
+            mSpeedTask.cancel();
             mStatus = Status.PAUSE;
             mDownloadManager.onDownloadPause(mDownloadModel.getDownloadId());
-            mSpeedTask.cancel();
         }
     }
     public void onDownloadStarted(long taskId,DownloadAsyncTask task){
@@ -163,6 +160,7 @@ public class Downloader{
     }
     public void stopDownload(){
         for (Map.Entry<Long,DownloadAsyncTask> entry : mDownloadTask.entrySet()) {
+            //Log.d(TAG,"onDownloadCancel2");
             entry.getValue().cancel(true);
         }
     }

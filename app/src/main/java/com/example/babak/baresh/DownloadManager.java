@@ -1,10 +1,8 @@
 package com.example.babak.baresh;
 
-import android.app.Activity;
 import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +15,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 public class DownloadManager extends BaseAdapter implements DownloadInfoDialogListener {
@@ -92,7 +88,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         //mDataSet.get(downloadId).setDownloadAccepted(true);
         //notifyDataSetChanged();
         mDownloadAccepted = true;
-        completeCreateLink();
+        createLinkComelete();
     }
 
     @Override
@@ -113,7 +109,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
                 dialog.setFileSizeChanged(mHeadAsyncTask.getFileSize());
             }
         }
-        completeCreateLink();
+        createLinkComelete();
     }
     public void onDownloadSizeChanged() {
         notifyDataSetChanged();
@@ -246,13 +242,14 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         }
         return str;
     }
-    private void completeCreateLink(){
+    private void createLinkComelete(){
         if (mDownloadAccepted && mHeadFinished) {
             DownloadModel model = new DownloadModel();
             model.setDownloadId(mCreateDownloadId);
             model.setUrl(mHeadAsyncTask.getUrl());
             model.setName(mHeadAsyncTask.getFileName());
             model.setFileSize(mHeadAsyncTask.getFileSize());
+            model.setDownloaded(0);
             HashMap<Long,TaskModel> task_list = new HashMap<>(4);
             long tmp;
             long start;

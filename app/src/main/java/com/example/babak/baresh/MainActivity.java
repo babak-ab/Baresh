@@ -102,11 +102,11 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setTitle("Add link for download...");
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
                // text.setText("http://techslides.com/demos/sample-videos/small.mp4");
-                text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
+                //text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
                 //text.setText("http://ipv4.download.thinkbroadband.com/1GB.zip");
                 //text.setText("https://speed.hetzner.de/10GB.bin");
                 //https://speed.hetzner.de/10GB.bin
-                //text.setText("http://dl.hastidl.me/data/Friends.S01.E03.Hastidl.mkv");
+                text.setText("http://dl.hastidl.me/data/Friends.S01.E03.Hastidl.mkv");
                 //text.setText("https://host2.rjmusicmedia.com/media/podcast/mp3-192/Abo-Atash-109.mp3");
                 //text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
                 Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);

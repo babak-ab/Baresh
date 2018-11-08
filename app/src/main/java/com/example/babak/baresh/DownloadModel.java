@@ -52,7 +52,7 @@ public class DownloadModel {
         return mDownloaded;
     }
 
-    public void setDownloaded(Long mDownloaded) {
+    public void setDownloaded(long mDownloaded) {
         this.mDownloaded = mDownloaded;
     }
 }
