@@ -75,9 +75,11 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         return true;
     }
     public void removeDownload(long downloadId){
+        for (Map.Entry<Long,TaskModel> entry : mDataSet.get(downloadId).getTasksModel().entrySet()) {
+            mdb.deleteTask(entry.getKey());
+        }
         mdb.deleteLink(downloadId);
         mHeadAsyncTask = null;
-        mdb.deleteLink(mCreateDownloadId);
         Downloader downloader = mDataSet.remove(downloadId);
         downloader = null;
         notifyDataSetChanged();
@@ -298,6 +300,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
             mHeadAsyncTask = null;
             //mdb.deleteLink(mCreateDownloadId);
             notifyDataSetChanged();
+            downloader.startDownload();
         }
     }
 

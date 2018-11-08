@@ -81,7 +81,6 @@ public class Downloader{
 
         mTimerUpdate = new Timer();
 
-        startDownload();
     }
     public HashMap<Long,TaskModel> getTasksModel(){
         return mTasksModel;

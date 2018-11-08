@@ -24,6 +24,7 @@ import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
@@ -65,7 +66,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public boolean onItemLongClick(final AdapterView<?> adapterView, View view, final int position, long id) {
                 //Log.e("PlaceholderFragment","HOLD");
-                String[] animals = {"Delete Link"};
+                String[] animals = {"Delete Link","Delete Link And File"};
+                final Downloader data = (Downloader) adapterView.getItemAtPosition(position);
                 new AlertDialog.Builder(MainActivity.this)
                         .setTitle("Title")
                         .setItems(animals, new DialogInterface.OnClickListener() {
@@ -73,8 +75,19 @@ public class MainActivity extends AppCompatActivity {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 switch (i) {
                                     case 0: // horse
+                                        mDownloadManager.removeDownload(data.getDownloadId());
+                                        break;
+                                    case 1:
                                         Downloader data = (Downloader) adapterView.getItemAtPosition(position);
                                         mDownloadManager.removeDownload(data.getDownloadId());
+                                        File fdelete = data.getFile();
+                                        if (fdelete.exists()) {
+                                            if (fdelete.delete()) {
+                                                Toast.makeText(MainActivity.this,"Link and file deleted",Toast.LENGTH_LONG).show();
+                                            } else {
+                                                Toast.makeText(MainActivity.this,"File not deleted",Toast.LENGTH_LONG).show();
+                                            }
+                                        }
                                         break;
                                 }
                             }
@@ -102,11 +115,11 @@ public class MainActivity extends AppCompatActivity {
                 dialog.setTitle("Add link for download...");
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
                // text.setText("http://techslides.com/demos/sample-videos/small.mp4");
-                //text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
+                text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
                 //text.setText("http://ipv4.download.thinkbroadband.com/1GB.zip");
                 //text.setText("https://speed.hetzner.de/10GB.bin");
                 //https://speed.hetzner.de/10GB.bin
-                text.setText("http://dl.hastidl.me/data/Friends.S01.E03.Hastidl.mkv");
+                //text.setText("http://dl.hastidl.me/data/Friends.S01.E03.Hastidl.mkv");
                 //text.setText("https://host2.rjmusicmedia.com/media/podcast/mp3-192/Abo-Atash-109.mp3");
                 //text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
                 Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
