@@ -113,10 +113,14 @@ public class Downloader{
         return mDurationTime / 1000;
     }
     public long getRemindTime() {
-        if(mSpeed > 0)
+        if(mSpeed > 0) {
+            Log.d(TAG,"onDownloadCancel1" + (mDownloadModel.getFileSize() - mDownloadModel.getDownloaded()));
             return (mDownloadModel.getFileSize() - mDownloadModel.getDownloaded()) / mSpeed;
-        else
+        }
+        else {
+            Log.d(TAG,"onDownloadCancel3"+mSpeed);
             return 0;
+        }
     }
     public File getFile() {
         return mFile;

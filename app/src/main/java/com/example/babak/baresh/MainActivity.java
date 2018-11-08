@@ -80,9 +80,9 @@ public class MainActivity extends AppCompatActivity {
                                     case 1:
                                         Downloader data = (Downloader) adapterView.getItemAtPosition(position);
                                         mDownloadManager.removeDownload(data.getDownloadId());
-                                        File fdelete = data.getFile();
-                                        if (fdelete.exists()) {
-                                            if (fdelete.delete()) {
+                                        File file = data.getFile();
+                                        if (file.exists()) {
+                                            if (file.delete()) {
                                                 Toast.makeText(MainActivity.this,"Link and file deleted",Toast.LENGTH_LONG).show();
                                             } else {
                                                 Toast.makeText(MainActivity.this,"File not deleted",Toast.LENGTH_LONG).show();

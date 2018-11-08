@@ -21,7 +21,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
     private HashMap<Long,Downloader> mDataSet;
     //private HashMap<Long,HttpAsyncTask> mHeadAsyncTasks;
     private ArrayList<DownloadModel> mDownloadModel;
-    private ArrayList<Long> mKeys;
+    private Long[] mKeys;
     private DBHelper mdb;
     private DownloadInfoDialog dialog;
     private Context mContext;
@@ -42,7 +42,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         mDataSet = data;
         mContext = context;
         mNumberOnThread = 4;
-        mKeys = new ArrayList<>();
+       // mKeys = new Long[];
         mdb = new DBHelper(context);
         mDownloadModel = mdb.getAllLinks();
         mDownloadAccepted = false;
@@ -55,8 +55,9 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
             Downloader downloader = new Downloader(model,mdb.getAllTasks(model.getDownloadId()),
                     this,mContext);
             mDataSet.put(model.getDownloadId(),downloader);
-            mKeys.add(model.getDownloadId());
+            //mKeys.add(model.getDownloadId());
         }
+        mKeys = mDataSet.keySet().toArray(new Long[mDataSet.size()]);
         notifyDataSetChanged();
     }
     public boolean createDownload(String url){
@@ -81,6 +82,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         mdb.deleteLink(downloadId);
         mHeadAsyncTask = null;
         Downloader downloader = mDataSet.remove(downloadId);
+        mKeys = mDataSet.keySet().toArray(new Long[mDataSet.size()]);
         downloader = null;
         notifyDataSetChanged();
     }
@@ -90,7 +92,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         //mDataSet.get(downloadId).setDownloadAccepted(true);
         //notifyDataSetChanged();
         mDownloadAccepted = true;
-        createLinkComelete();
+        createlinkcomelete();
     }
 
     @Override
@@ -111,7 +113,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
                 dialog.setFileSizeChanged(mHeadAsyncTask.getFileSize());
             }
         }
-        createLinkComelete();
+        createlinkcomelete();
     }
     public void onDownloadSizeChanged() {
         notifyDataSetChanged();
@@ -142,7 +144,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
 
     @Override
     public Object getItem(int i) {
-        return mDataSet.get(mKeys.get(i));
+        return mDataSet.get(mKeys[i]);
     }
 
     @Override
@@ -244,7 +246,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
         }
         return str;
     }
-    private void createLinkComelete(){
+    private void createlinkcomelete(){
         if (mDownloadAccepted && mHeadFinished) {
             DownloadModel model = new DownloadModel();
             model.setDownloadId(mCreateDownloadId);
@@ -293,7 +295,7 @@ public class DownloadManager extends BaseAdapter implements DownloadInfoDialogLi
             }
             Downloader downloader = new Downloader(model, task_list, this, mContext);
             mDataSet.put(mCreateDownloadId, downloader);
-            mKeys.add(mCreateDownloadId);
+            mKeys = mDataSet.keySet().toArray(new Long[mDataSet.size()]);
             mdb.updateSizeLink(mCreateDownloadId, mHeadAsyncTask.getFileSize());
             mdb.updateLink(mCreateDownloadId, mDataSet.get(mCreateDownloadId).getFileName(),
                     mDataSet.get(mCreateDownloadId).getUrl(), mDataSet.get(mCreateDownloadId).getFile().getAbsolutePath());
