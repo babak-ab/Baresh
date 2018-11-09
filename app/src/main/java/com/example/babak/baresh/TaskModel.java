@@ -5,8 +5,9 @@ public class TaskModel {
     private Long mDownloadId;
     private Long mStart;
     private Long mEnd;
+    public TaskModel(){
 
-
+    }
     public Long getDownloadId() {
         return mDownloadId;
     }

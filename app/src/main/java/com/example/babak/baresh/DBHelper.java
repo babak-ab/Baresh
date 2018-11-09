@@ -19,7 +19,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String LINKS_COLUMN_ID = "id";
     public static final String LINKS_COLUMN_NAME = "name";
     public static final String LINKS_COLUMN_URL = "url";
-    public static final String LINKS_COLUMN_FILE = "file";
+    //public static final String LINKS_COLUMN_FILE = "file";
     public static final String LINKS_COLUMN_SIZE = "size";
     public static final String LINKS_COLUMN_DOWNLOADED = "downloaded";
     public static final String LINKS_COLUMN_PARTIAL = "partial";
@@ -28,8 +28,11 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String TASKS_COLUMN_DOWNLOAD_FK = "downloadId_fk";
     public static final String TASKS_COLUMN_START = "startByte";
     public static final String TASKS_COLUMN_END = "endByte";
-    public DBHelper(Context context) {
+
+    private DownloadManagerService mDownloadManager;
+    public DBHelper(Context context,DownloadManagerService downloadManager) {
         super(context, DATABASE_NAME , null, 1);
+        mDownloadManager = downloadManager;
     }
 
     @Override
@@ -55,12 +58,11 @@ public class DBHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public long insertLink (String name, String address, String file,long size,long downloaded) {
+    public long insertLink (String name, String address,long size,long downloaded) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(LINKS_COLUMN_NAME, name);
         contentValues.put(LINKS_COLUMN_URL, address);
-        contentValues.put(LINKS_COLUMN_FILE, file);
         contentValues.put(LINKS_COLUMN_SIZE, size);
         contentValues.put(LINKS_COLUMN_DOWNLOADED, downloaded);
         long id = db.insert("links", null, contentValues);
@@ -102,12 +104,12 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update("links", contentValues, "id = ? ", new String[] { Long.toString(id) } );
         return true;
     }
-    public boolean updateLink(Long id, String name, String address, String path) {
+    public boolean updateLink(Long id, String name, String address) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(LINKS_COLUMN_NAME, name);
         contentValues.put(LINKS_COLUMN_URL, address);
-        contentValues.put(LINKS_COLUMN_FILE, path);
+        //contentValues.put(LINKS_COLUMN_FILE, path);
         db.update("links", contentValues, "id = ? ", new String[] { Long.toString(id) } );
         return true;
     }
@@ -133,31 +135,27 @@ public class DBHelper extends SQLiteOpenHelper {
                 "id = ? ",
                 new String[] {String.valueOf(id)});
     }
-    public ArrayList<DownloadModel> getAllLinks() {
-        ArrayList<DownloadModel> array_list = new ArrayList<DownloadModel>();
+    public HashMap<Long,Downloader> getAllLinks() {
+        HashMap<Long,Downloader> array_list = new HashMap<>();
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from links", null );
         res.moveToFirst();
         while(res.isAfterLast() == false){
             String name = res.getString(res.getColumnIndex(LINKS_COLUMN_NAME));
             String id = res.getString(res.getColumnIndex(LINKS_COLUMN_ID));
-            String file = res.getString(res.getColumnIndex(LINKS_COLUMN_FILE));
             String url = res.getString(res.getColumnIndex(LINKS_COLUMN_URL));
             String size = res.getString(res.getColumnIndex(LINKS_COLUMN_SIZE));
             String downloaded = res.getString(res.getColumnIndex(LINKS_COLUMN_DOWNLOADED));
-            DownloadModel model = new DownloadModel();
-            model.setDownloadId(Long.parseLong(id));
-            model.setUrl(url);
-            model.setName(name);
-            model.setFile(file);
-            model.setFileSize(Long.parseLong(size));
-            model.setDownloaded(Long.parseLong(downloaded));
-            array_list.add(model);
+            Downloader downloader = new Downloader(Long.parseLong(id),url,name,mDownloadManager);
+            downloader.setDownloadTask(getAllTasks(downloader.getDownloadId()));
+            downloader.setFileSize(Long.parseLong(size));
+            downloader.setDownloaded(Long.parseLong(downloaded));
+            array_list.put(Long.parseLong(id),downloader);
             res.moveToNext();
         }
         return array_list;
     }
-    public HashMap<Long,TaskModel> getAllTasks(Long downloadId) {
+    public HashMap<Long,TaskModel> getAllTasks(long downloadId) {
         HashMap<Long,TaskModel> array_list = new HashMap<>(4);
         SQLiteDatabase db = this.getReadableDatabase();
         Cursor res =  db.rawQuery( "select * from tasks where downloadId_fk = "+downloadId+"", null );
@@ -166,15 +164,14 @@ public class DBHelper extends SQLiteOpenHelper {
             String taskId = res.getString(res.getColumnIndex(TASKS_COLUMN_ID));
             String start = res.getString(res.getColumnIndex(TASKS_COLUMN_START));
             String end = res.getString(res.getColumnIndex(TASKS_COLUMN_END));
-            TaskModel model = new TaskModel();
-            model.setDownloadId(downloadId);
-            model.setStart(Long.valueOf(start));
-            model.setEnd(Long.valueOf(end));
-            model.setTaskId(Long.valueOf(taskId));
-            array_list.put(Long.valueOf(taskId),model);
+            TaskModel task = new TaskModel();
+            task.setTaskId(Long.valueOf(taskId));
+            task.setDownloadId(downloadId);
+            task.setStart(Long.valueOf(start));
+            task.setEnd(Long.valueOf(end));
+            array_list.put(Long.valueOf(taskId),task);
             res.moveToNext();
         }
-
         return array_list;
     }
 

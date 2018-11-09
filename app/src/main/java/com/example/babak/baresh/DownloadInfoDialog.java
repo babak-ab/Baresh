@@ -21,11 +21,9 @@ import java.util.List;
 
 public class DownloadInfoDialog extends Dialog{
 
-    private Long mDownloadId;
     private DownloadInfoDialogListener mListener;
-    public DownloadInfoDialog(@NonNull Context context,Long downloadId, String urlString) {
+    public DownloadInfoDialog(@NonNull Context context, String urlString) {
         super(context);
-        mDownloadId = downloadId;
         setContentView(R.layout.download_info_dialog_layout);
         setTitle("Add link for download...");
         List<String> categories = new ArrayList<String>();
@@ -53,7 +51,8 @@ public class DownloadInfoDialog extends Dialog{
         button_start.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                mListener.onDownloadAccepted(mDownloadId);
+                if(mListener != null)
+                    mListener.onDownloadAccepted();
                 //DownloadInfoDialog.this.dismiss();
             }
         });
@@ -62,7 +61,8 @@ public class DownloadInfoDialog extends Dialog{
         button_cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View arg0) {
-                mListener.onDownloadAccepted(mDownloadId);
+                if(mListener != null)
+                    mListener.onDownloadAccepted();
                 //DownloadInfoDialog.this.dismiss();
             }
         });

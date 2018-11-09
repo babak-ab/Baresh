@@ -3,6 +3,7 @@ package com.example.babak.baresh;
 import android.annotation.SuppressLint;
 import android.os.AsyncTask;
 import android.util.Log;
+import android.view.View;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,17 +14,16 @@ import java.net.URL;
 public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
 
     private static final String TAG = "MyActivity";
-    private DownloadManager mDownloadManager;
-    private Long mDownloadId;
+    private HttpDownloadListener mListener;
     private Boolean mPartialContent;
     private long mFileSize;
     private String mFileName;
     private String mUrl;
-    public HttpAsyncTask(DownloadManager downloadManager,Long downloadId) {
-        mDownloadManager = downloadManager;
-        mDownloadId = downloadId;
+    public HttpAsyncTask(HttpDownloadListener listener) {
         mPartialContent = false;
+        mListener = listener;
     }
+
     @Override
     protected Integer doInBackground(String... urls) {
             HttpURLConnection urlConnection = null;
@@ -103,7 +103,8 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
     }
     @Override
     protected void onPostExecute(Integer integer) {
-        mDownloadManager.onHeadFinished(mDownloadId);
+        if(mListener != null)
+            mListener.onHeadFinished();
 //        mDownloader.setPartialContent(mPartialContent);
 //        mDownloader.setFileSize(mFileSize);
 //        mDownloader.setFileName(mFileName);

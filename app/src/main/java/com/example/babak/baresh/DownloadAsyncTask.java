@@ -20,7 +20,7 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     private Long mLastByte;
     private long mTaskId;
     File rootDir = Environment.getExternalStorageDirectory();
-    public DownloadAsyncTask(long taskId,Long startByte,Long endByte,Downloader downloader) {
+    public DownloadAsyncTask(long taskId,long startByte,long endByte,Downloader downloader) {
         mDownloader = downloader;
         mTaskId = taskId;
         mStartByte = startByte;
@@ -84,7 +84,7 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
     protected void onCancelled() {
         super.onCancelled();
         mDownloader.onDownloadCancel(mTaskId);
-        Log.e("PlaceholderFragment", "onCancelled " + mStartByte);
+        //Log.e("PlaceholderFragment", "onCancelled " + mStartByte);
     }
     public void setStartByte(Long startByte) {
         mStartByte = mStartByte;

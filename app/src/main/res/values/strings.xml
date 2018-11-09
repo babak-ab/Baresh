@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name">Baresh</string>
     <string name="add">add</string>
+    <string name="my_string">\"TEST\"</string>
 
 </resources>
