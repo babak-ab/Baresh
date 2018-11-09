@@ -114,9 +114,9 @@ public class MainActivity extends AppCompatActivity implements
                 return true;
             }
         });
-
-        Intent startIntent = new Intent(getApplicationContext(), DownloadManagerService.class);
-        bindService(startIntent, this, BIND_AUTO_CREATE);
+        getApplicationContext().bindService(new Intent(getApplicationContext(), DownloadManagerService.class), this,BIND_AUTO_CREATE);
+       // Intent startIntent = new Intent(getApplicationContext(), DownloadManagerService.class);
+        //bindService(startIntent, this, BIND_AUTO_CREATE);
        // startIntent.setAction("START");
         //startService(startIntent);
 
@@ -185,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
+        Log.d("SSSSSSS","onServiceConnected " );
         mDownloadManagerService = ((DownloadManagerService.MyBinder)iBinder).getService();
         mDownloadManagerService.setCallBack(this);
     }
@@ -254,18 +255,18 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     protected void onPause() {
         super.onPause();
-        if (mDownloadManagerService != null) {
-            mDownloadManagerService.setCallBack(null);
-            unbindService(this);
-        }
+//        if (mDownloadManagerService != null) {
+//            mDownloadManagerService.setCallBack(null);
+//            unbindService(this);
+//        }
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if (mDownloadManagerService != null) {
-            mDownloadManagerService.setCallBack(null);
-            unbindService(this);
-        }
+//        if (mDownloadManagerService != null) {
+//            mDownloadManagerService.setCallBack(null);
+//            unbindService(this);
+//        }
     }
 }

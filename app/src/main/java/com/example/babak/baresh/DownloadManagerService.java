@@ -9,6 +9,7 @@ import android.graphics.BitmapFactory;
 import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -64,7 +65,9 @@ public class DownloadManagerService extends Service {
         mDownloaderHashMap.remove(downloadId);
     }
     public void onDownloadSizeChanged() {
+        Log.d("AAAAAAAAAA","onDownloadSizeChanged " + "," + mCallBack );
         if(mCallBack != null){
+            Log.d("AAAAAAAAAA","onDownloadSizeChangedF " );
             mCallBack.onNotifyDataSetChanged();
         }
        // notifyDataSetChanged();
@@ -172,15 +175,15 @@ public class DownloadManagerService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //TODO do something useful
-        if (intent != null && intent.getAction().equals("START")) {
-            startServiceWithNotification();
-        }
-        else stopMyService();
+//        if (intent != null && intent.getAction().equals("START")) {
+//            startServiceWithNotification();
+//        }
+//        else stopMyService();
         return START_STICKY;
     }
     @Override
     public void onDestroy() {
-        isServiceRunning = false;
+        //isServiceRunning = false;
         super.onDestroy();
     }
 
@@ -224,6 +227,7 @@ public class DownloadManagerService extends Service {
     }
     public void setCallBack(CallBack callBack) {
         mCallBack = callBack;
+        Log.d("AAAAAAAAAA","setCallBack " +"," + mCallBack);
         if(mCallBack != null)
             mCallBack.onNotifyDataSetChanged();
     }
