@@ -156,7 +156,7 @@ public class Downloader{
     public void onDownloadCancel(long taskId){
         mTaskModel.get(taskId).setStart(mDownloadTask.get(taskId).getStartByte());
         mDownloadTask.remove(taskId);
-        Log.d(TAG,"onDownloadCancel " + taskId);
+        //Log.d(TAG,"onDownloadCancel " + taskId);
         if(mDownloadTask.size() == 0) {
             mSpeedTask.cancel();
             mStatus = Status.PAUSE;
@@ -165,7 +165,6 @@ public class Downloader{
     }
     public void onDownloadStarted(long taskId,DownloadAsyncTask task){
         mDownloadTask.put(taskId,task);
-        Log.d(TAG,"onDownloadStarted " + taskId + "," + mNumTaskShouldBeStart);
           if(mDownloadTask.size() == mNumTaskShouldBeStart){
               mStatus = Status.RUNNING;
               mDownloadManager.onDownloadStart(mDownloadId);
@@ -184,7 +183,7 @@ public class Downloader{
 //        mDownloadManager.onHeadFinished(mDownloadModel.getDownloadId());
 //    }
     public void onDownloadFinished(long taskId){
-        Log.d(TAG,"onDownloadFinished " + taskId);
+        //Log.d(TAG,"onDownloadFinished " + taskId);
         mTaskModel.get(taskId).setStart(mDownloadTask.get(taskId).getStartByte());
         mDownloadTask.remove(taskId);
         if(mDownloadTask.size() == 0) {
@@ -199,16 +198,12 @@ public class Downloader{
         }
     }
     public void startDownload() {
-        Log.d(TAG,"startDownload");
         mNumTaskShouldBeStart = 0;
         for (Map.Entry<Long,TaskModel> entry : mTaskModel.entrySet()) {
-//            Log.d(TAG,"onDownloadCancelAَ " + "," + entry.getKey()+ "," +entry.getValue().getStart() + "," +
-//                    entry.getValue().getEnd());
             if(entry.getValue().getStart() < entry.getValue().getEnd()) {
                 DownloadAsyncTask task = new DownloadAsyncTask(entry.getKey(), entry.getValue().getStart(),
                         entry.getValue().getEnd(), this);
                 mNumTaskShouldBeStart++;
-                Log.d(TAG,"startDownload "+mNumTaskShouldBeStart);;
                 task.execute(mUrl);
             }
         }

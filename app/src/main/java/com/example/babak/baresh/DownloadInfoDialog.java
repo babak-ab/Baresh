@@ -62,7 +62,7 @@ public class DownloadInfoDialog extends Dialog{
             @Override
             public void onClick(View arg0) {
                 if(mListener != null)
-                    mListener.onDownloadAccepted();
+                    mListener.onDownloadReject();
                 //DownloadInfoDialog.this.dismiss();
             }
         });
@@ -72,6 +72,10 @@ public class DownloadInfoDialog extends Dialog{
         mListener = listener;
     }
 
+    public void setUrlChanged(String url){
+        TextView textView = (TextView)this.findViewById(R.id.editText_downloadInfoUrl);
+        textView.setText(url);
+    }
     public void setFileSizeChanged(Long size) {
         String string = "0";
         double sValue;

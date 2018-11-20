@@ -22,6 +22,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.PopupWindow;
@@ -36,29 +38,28 @@ public class MainActivity extends AppCompatActivity implements
         DownloadInfoDialogListener,HttpDownloadListener,ServiceConnection, DownloadManagerService.CallBack {
 
     private Context mContext;
-    private PopupWindow mPopupWindow;
-    private LinearLayout mLinearLayout;
-    private Button button;
-    private Downloader download;
+    //private PopupWindow mPopupWindow;
+    //private LinearLayout mLinearLayout;
+    //private Button button;
+    //private Downloader download;
+    private String mCurrentUrl;
     private DownloadAdapter mDownloadAdapter;
     private HttpAsyncTask mHeadAsyncTask;
     private ArrayList<Downloader> dataModels;
     private DownloadManagerService mDownloadManagerService;
     private DownloadInfoDialog mInfoDialog;
-    private boolean mHeadFinished;
-    private boolean mDownloadAccepted;
+    private EditText editText_login;
+    private EditText editText_password;
+    private CheckBox checkBox_authentication;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setSupportActionBar((Toolbar) findViewById(R.id.toolbar));
         mContext = MainActivity.this;
-        mLinearLayout = (LinearLayout) findViewById(R.id.activity_main_ll);
         isStoragePermissionGranted();
         ListView listView = (ListView) findViewById(R.id.listView);
         dataModels = new ArrayList<>();
-        mHeadFinished = false;
-        mDownloadAccepted = false;
         mDownloadAdapter = new DownloadAdapter(dataModels,MainActivity.this);
         listView.setAdapter(mDownloadAdapter);
         listView.setItemsCanFocus(false);
@@ -133,11 +134,28 @@ public class MainActivity extends AppCompatActivity implements
                 final Dialog dialog = new Dialog(MainActivity.this);
                 dialog.setContentView(R.layout.add_dialog_layout);
                 dialog.setTitle("Add link for download...");
+                final LinearLayout linearLayout = (LinearLayout)dialog.findViewById(R.id.linearLayout_authentication);
+                editText_login = (EditText)dialog.findViewById(R.id.editText_username);
+                editText_password = (EditText)dialog.findViewById(R.id.editText_password);
+                checkBox_authentication = (CheckBox)dialog.findViewById(R.id.checkBox_authentication);
+                checkBox_authentication.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        if(checkBox_authentication.isChecked()){
+                            linearLayout.setVisibility(View.VISIBLE);
+                        }else{
+                            linearLayout.setVisibility(View.GONE);
+                        }
+                    }
+                });
+
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
                // text.setText("http://techslides.com/demos/sample-videos/small.mp4");
-                text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
+                //text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
                 //text.setText("http://ipv4.download.thinkbroadband.com/1GB.zip");
-                //text.setText("https://speed.hetzner.de/10GB.bin");
+                text.setText("https://httpstat.us/303");
+                text.setText("https://jigsaw.w3.org/HTTP/Basic/");
+                //text.setText("http://det.jrl.police.ir/backend/uploads/701726543874abcd5515189a1ec68423b27f7d28.pdf");
                 //https://speed.hetzner.de/10GB.bin
                 //text.setText("http://dl.hastidl.me/data/Friends.S01.E03.Hastidl.mkv");
                 //text.setText("https://host2.rjmusicmedia.com/media/podcast/mp3-192/Abo-Atash-109.mp3");
@@ -147,10 +165,10 @@ public class MainActivity extends AppCompatActivity implements
                 //dialogButton.setOnClickListener(new AddDialogButtonClicked(dialog,(String)text.getText().toString()));
                 dialogButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        mHeadFinished = false;
-                        mDownloadAccepted = false;
-                        mHeadAsyncTask = new HttpAsyncTask(MainActivity.this);
+                        mHeadAsyncTask = new HttpAsyncTask(MainActivity.this,checkBox_authentication.isChecked(),
+                                editText_login.getText().toString(),editText_password.getText().toString());
                         mHeadAsyncTask.execute((String)text.getText().toString());
+                        mCurrentUrl = text.getText().toString();
                         mInfoDialog = new DownloadInfoDialog(mContext,(String)text.getText().toString());
                         mInfoDialog.setListener(MainActivity.this);
                         mInfoDialog.show();
@@ -158,7 +176,8 @@ public class MainActivity extends AppCompatActivity implements
                     }
                 });
                 dialog.show();
-                break;
+
+
             default:
                 break;
         }
@@ -167,25 +186,22 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onDownloadAccepted() {
-        //createDownload();
-        mDownloadAccepted = true;
         mInfoDialog.cancel();
-        if(mHeadFinished && mDownloadAccepted) {
-            mHeadFinished = false;
-            mDownloadAccepted = false;
-            mDownloadManagerService.createDownload(mHeadAsyncTask.getUrl(),mHeadAsyncTask.getFileName(),
-                    mHeadAsyncTask.getFileSize());
-        }
+        boolean head_successful = mHeadAsyncTask.isSuccessful();
+        int result = mHeadAsyncTask.responseCode();
+        mHeadAsyncTask.cancel(true);
+        mDownloadManagerService.createDownload(mHeadAsyncTask.getUrl());
     }
 
     @Override
     public void onDownloadReject() {
         mInfoDialog.cancel();
+        mHeadAsyncTask.cancel(true);
     }
 
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-        Log.d("SSSSSSS","onServiceConnected " );
+
         mDownloadManagerService = ((DownloadManagerService.MyBinder)iBinder).getService();
         mDownloadManagerService.setCallBack(this);
     }
@@ -208,19 +224,46 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onHeadFinished() {
-        //createDownload();
-        mHeadFinished = true;
-        if(mInfoDialog != null){
-            if(mInfoDialog.isShowing()){
-                mInfoDialog.setFileSizeChanged(mHeadAsyncTask.getFileSize());
-            }
-        }
-        if(mHeadFinished && mDownloadAccepted) {
-            mHeadFinished = false;
-            mDownloadAccepted = false;
-            mDownloadManagerService.createDownload(mHeadAsyncTask.getUrl(),mHeadAsyncTask.getFileName(),
-                    mHeadAsyncTask.getFileSize());
+    public void onHeadFinished(int result) {
+        switch (result){
+            case 200:
+                if (mInfoDialog != null) {
+                    if (mInfoDialog.isShowing()) {
+                        mInfoDialog.setFileSizeChanged(mHeadAsyncTask.getFileSize());
+                    }
+                }
+                break;
+            case 0:
+                break;
+            case 301:
+            case 302:
+            case 303:
+                if(mHeadAsyncTask.getLocation() != null){
+                    if (mInfoDialog != null) {
+                        if (mInfoDialog.isShowing()) {
+                            mInfoDialog.setUrlChanged(mHeadAsyncTask.getLocation());
+                        }
+                    }
+                    String url = mHeadAsyncTask.getLocation();
+                    mHeadAsyncTask.cancel(true);
+                    mHeadAsyncTask = new HttpAsyncTask(MainActivity.this,checkBox_authentication.isChecked(),
+                            editText_login.getText().toString(),editText_password.getText().toString());
+                    mHeadAsyncTask.execute(url);
+                }
+                break;
+            case 401:
+//                    HttpAsyncTask.Authenticate auth = mHeadAsyncTask.getAuthenticateType();
+//                    mHeadAsyncTask.cancel(true);
+//                    if(auth != HttpAsyncTask.Authenticate.Authenticate_Failed &&
+//                            checkBox_authentication.isChecked()) {
+//                        mHeadAsyncTask = new HttpAsyncTask(MainActivity.this);
+//                        mHeadAsyncTask.setAuthenticateEnable(checkBox_authentication.isChecked());
+//                        mHeadAsyncTask.setLogin(editText_login.getText().toString());
+//                        mHeadAsyncTask.setPassword(editText_password.getText().toString());
+//                        mHeadAsyncTask.setAuthenticateType();
+//                        mHeadAsyncTask.execute(mCurrentUrl);
+//                    }
+                break;
         }
     }
 

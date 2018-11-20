@@ -16,9 +16,10 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-public class DownloadManagerService extends Service {
+public class DownloadManagerService extends Service implements HttpDownloadListener{
     static final int NOTIFICATION_ID = 543;
     public static boolean isServiceRunning = false;
+    HeadAsyncTask mHeadAsyncTask;
     private HashMap<Long,Downloader> mDownloaderHashMap;
     private DBHelper mdb;
     private Long mCreateDownloadId;
@@ -65,9 +66,7 @@ public class DownloadManagerService extends Service {
         mDownloaderHashMap.remove(downloadId);
     }
     public void onDownloadSizeChanged() {
-        Log.d("AAAAAAAAAA","onDownloadSizeChanged " + "," + mCallBack );
         if(mCallBack != null){
-            Log.d("AAAAAAAAAA","onDownloadSizeChangedF " );
             mCallBack.onNotifyDataSetChanged();
         }
        // notifyDataSetChanged();
@@ -100,7 +99,7 @@ public class DownloadManagerService extends Service {
 //        }
         //notifyDataSetChanged();
     }
-    public void createDownload(String url,String filename,Long fileSize) {
+    private void createDownload(String url,String filename,Long fileSize) {
         mCreateDownloadId = mdb.insertLink("",url,0,0);
         Downloader downloader = new Downloader(mCreateDownloadId,url,filename,this);
         downloader.setFileSize(fileSize);
@@ -163,27 +162,31 @@ public class DownloadManagerService extends Service {
         }
         downloader.startDownload();
     }
+    public void createDownload(String url) {
+        mHeadAsyncTask = new HeadAsyncTask(this);
+        mHeadAsyncTask.execute(url);
+    }
     @Override
     public void onCreate() {
         super.onCreate();
         mdb = new DBHelper(getApplicationContext(),this);
         mDownloaderHashMap = mdb.getAllLinks();
         //mCallBack.onNotifyDataSetChanged();
-        // startServiceWithNotification();
+        startServiceWithNotification();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         //TODO do something useful
-//        if (intent != null && intent.getAction().equals("START")) {
-//            startServiceWithNotification();
-//        }
-//        else stopMyService();
+        if (intent != null && intent.getAction().equals("START")) {
+            startServiceWithNotification();
+        }
+        else stopMyService();
         return START_STICKY;
     }
     @Override
     public void onDestroy() {
-        //isServiceRunning = false;
+        isServiceRunning = false;
         super.onDestroy();
     }
 
@@ -197,13 +200,13 @@ public class DownloadManagerService extends Service {
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
         PendingIntent contentPendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
 
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.drawable.ic_android_light_green_900_24dp);
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher);
 
         Notification notification = new Notification.Builder(this)
                 .setContentTitle(getResources().getString(R.string.app_name))
-                .setTicker(getResources().getString(R.string.app_name))
-                .setContentText(getResources().getString(R.string.my_string))
-                .setSmallIcon(R.drawable.ic_local_movies_purple_900_24dp)
+                //.setTicker(getResources().getString(R.string.app_name))
+                //.setContentText(getResources().getString(R.string.my_string))
+                .setSmallIcon(R.drawable.ic_stat_14dp)
                 .setLargeIcon(Bitmap.createScaledBitmap(icon, 128, 128, false))
                 .setContentIntent(contentPendingIntent)
                 .setOngoing(true)
@@ -222,12 +225,18 @@ public class DownloadManagerService extends Service {
     public IBinder onBind(Intent intent) {
         return mLocalBinder;
     }
+
+    @Override
+    public void onHeadFinished(int result) {
+        createDownload(mHeadAsyncTask.getUrl(),mHeadAsyncTask.getFileName(),
+                mHeadAsyncTask.getFileSize());
+    }
+
     public interface CallBack {
         void onNotifyDataSetChanged();
     }
     public void setCallBack(CallBack callBack) {
         mCallBack = callBack;
-        Log.d("AAAAAAAAAA","setCallBack " +"," + mCallBack);
         if(mCallBack != null)
             mCallBack.onNotifyDataSetChanged();
     }

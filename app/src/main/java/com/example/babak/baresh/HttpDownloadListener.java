@@ -1,5 +1,5 @@
 package com.example.babak.baresh;
 
 public interface HttpDownloadListener {
-    void onHeadFinished();
+    void onHeadFinished(int result);
 }
