@@ -19,7 +19,7 @@ import java.util.Map;
 public class DownloadManagerService extends Service implements HttpDownloadListener{
     static final int NOTIFICATION_ID = 543;
     public static boolean isServiceRunning = false;
-    HeadAsyncTask mHeadAsyncTask;
+    private HttpAsyncTask mHeadAsyncTask;
     private HashMap<Long,Downloader> mDownloaderHashMap;
     private DBHelper mdb;
     private Long mCreateDownloadId;
@@ -162,8 +162,8 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
         }
         downloader.startDownload();
     }
-    public void createDownload(String url) {
-        mHeadAsyncTask = new HeadAsyncTask(this);
+    public void createDownload(String url,boolean isAuthentication,String username,String password) {
+        mHeadAsyncTask = new HttpAsyncTask(this,isAuthentication,username,password);
         mHeadAsyncTask.execute(url);
     }
     @Override
@@ -228,8 +228,15 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
 
     @Override
     public void onHeadFinished(int result) {
-        createDownload(mHeadAsyncTask.getUrl(),mHeadAsyncTask.getFileName(),
-                mHeadAsyncTask.getFileSize());
+        switch (result){
+            case 200:
+                createDownload(mHeadAsyncTask.getUrl(),mHeadAsyncTask.getFileName(),
+                        mHeadAsyncTask.getFileSize());
+                break;
+            default:
+
+                break;
+        }
     }
 
     public interface CallBack {

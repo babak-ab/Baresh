@@ -84,7 +84,7 @@ public class DownloadInfoDialog extends Dialog{
         Long MB = (long)1024 * 1024;
         Long KB = (long)1024;
         if(size < 1024){
-            string = String.valueOf(size);
+            string = String.valueOf(size) +"B";
         }else if(size >= KB && size < MB){
             sValue = size / 1024.0;
             string = String.format ("%.2f", sValue)  + "KB";

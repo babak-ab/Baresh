@@ -151,10 +151,11 @@ public class MainActivity extends AppCompatActivity implements
 
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
                // text.setText("http://techslides.com/demos/sample-videos/small.mp4");
-                //text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
+                text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
                 //text.setText("http://ipv4.download.thinkbroadband.com/1GB.zip");
-                text.setText("https://httpstat.us/303");
-                text.setText("https://jigsaw.w3.org/HTTP/Basic/");
+                //text.setText("https://httpstat.us/303");
+                //text.setText("https://jigsaw.w3.org/HTTP/Digest/");
+                //text.setText("http://httpbin.org/basic-auth/path/path");
                 //text.setText("http://det.jrl.police.ir/backend/uploads/701726543874abcd5515189a1ec68423b27f7d28.pdf");
                 //https://speed.hetzner.de/10GB.bin
                 //text.setText("http://dl.hastidl.me/data/Friends.S01.E03.Hastidl.mkv");
@@ -190,7 +191,8 @@ public class MainActivity extends AppCompatActivity implements
         boolean head_successful = mHeadAsyncTask.isSuccessful();
         int result = mHeadAsyncTask.responseCode();
         mHeadAsyncTask.cancel(true);
-        mDownloadManagerService.createDownload(mHeadAsyncTask.getUrl());
+        mDownloadManagerService.createDownload(mHeadAsyncTask.getUrl(),checkBox_authentication.isChecked(),
+                editText_login.getText().toString(),editText_password.getText().toString());
     }
 
     @Override
@@ -244,25 +246,9 @@ public class MainActivity extends AppCompatActivity implements
                             mInfoDialog.setUrlChanged(mHeadAsyncTask.getLocation());
                         }
                     }
-                    String url = mHeadAsyncTask.getLocation();
-                    mHeadAsyncTask.cancel(true);
-                    mHeadAsyncTask = new HttpAsyncTask(MainActivity.this,checkBox_authentication.isChecked(),
-                            editText_login.getText().toString(),editText_password.getText().toString());
-                    mHeadAsyncTask.execute(url);
                 }
                 break;
-            case 401:
-//                    HttpAsyncTask.Authenticate auth = mHeadAsyncTask.getAuthenticateType();
-//                    mHeadAsyncTask.cancel(true);
-//                    if(auth != HttpAsyncTask.Authenticate.Authenticate_Failed &&
-//                            checkBox_authentication.isChecked()) {
-//                        mHeadAsyncTask = new HttpAsyncTask(MainActivity.this);
-//                        mHeadAsyncTask.setAuthenticateEnable(checkBox_authentication.isChecked());
-//                        mHeadAsyncTask.setLogin(editText_login.getText().toString());
-//                        mHeadAsyncTask.setPassword(editText_password.getText().toString());
-//                        mHeadAsyncTask.setAuthenticateType();
-//                        mHeadAsyncTask.execute(mCurrentUrl);
-//                    }
+            default:
                 break;
         }
     }
