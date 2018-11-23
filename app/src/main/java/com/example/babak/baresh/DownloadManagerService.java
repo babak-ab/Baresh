@@ -150,9 +150,22 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
         downloader.startDownload();
     }
     public void createDownload(String url,boolean isAuthentication,String username,String password) {
-        mCreateDownloadId = mdb.insertLink("",url,0,0);
-        String filename = url.substring(url.lastIndexOf("/") + 1,
-                url.length());
+        String filename = "Default.html";
+        if(url.contains("/")){
+            filename = url.substring(url.lastIndexOf("/") + 1,
+                    url.length());
+        }else{
+            filename = url + ".html";
+        }
+        if(filename.isEmpty()){
+            String [] list = url.split("/");
+            if(list.length > 0) {
+                filename = list[list.length - 1] + ".html";
+            }else{
+                filename = "Default.html";
+            }
+        }
+        mCreateDownloadId = mdb.insertLink(filename,url,0,0);
         Downloader downloader = new Downloader(mCreateDownloadId,url,filename,this);
         downloader.setStatus(Downloader.Status.CONNECTING);
         mDownloaderHashMap.put(mCreateDownloadId, downloader);
