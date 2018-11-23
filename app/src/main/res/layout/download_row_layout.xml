@@ -29,37 +29,18 @@
             android:text="FIleName" />
     </LinearLayout>
 
-    <!--<LinearLayout-->
-    <!--android:layout_width="match_parent"-->
-    <!--android:layout_height="wrap_content"-->
-    <!--android:layout_weight="1"-->
-    <!--android:orientation="horizontal">-->
 
-    <!--&lt;!&ndash;<android.support.v7.widget.RecyclerView&ndash;&gt;-->
-    <!--&lt;!&ndash;android:id="@+id/progress_listView"&ndash;&gt;-->
-    <!--&lt;!&ndash;android:layout_width="match_parent"&ndash;&gt;-->
-    <!--&lt;!&ndash;android:layout_height="match_parent"&ndash;&gt;-->
-    <!--&lt;!&ndash;android:orientation="horizontal"&ndash;&gt;-->
-    <!--&lt;!&ndash;android:layout_weight="1" />&ndash;&gt;-->
-
-    <!--&lt;!&ndash;<com.example.babak.baresh.DownloadProgress&ndash;&gt;-->
-    <!--&lt;!&ndash;android:id="@+id/downloadProgress"&ndash;&gt;-->
-    <!--&lt;!&ndash;android:layout_width="wrap_content"&ndash;&gt;-->
-    <!--&lt;!&ndash;android:layout_height="wrap_content"&ndash;&gt;-->
-    <!--&lt;!&ndash;android:layout_weight="1" />&ndash;&gt;-->
-
-
-    <!--</LinearLayout>-->
-
-    <android.support.constraint.ConstraintLayout
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        android:background="#eee">
 
         <ProgressBar
             android:id="@+id/download_progressBar"
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="21dp"
+            android:layout_height="20dp"
             android:layout_weight="3"
             android:max="100"
             android:min="0"
@@ -68,48 +49,65 @@
             app:layout_constraintStart_toStartOf="parent" />
 
         <TextView
+            android:id="@+id/downloadSize_textView"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:gravity="start"
+            android:text=""
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/divider1"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <View
+            android:id="@+id/divider1"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:background="#ccc"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/downloadSize_textView"
+            app:layout_constraintRight_toLeftOf="@+id/speed_textView"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
             android:id="@+id/speed_textView"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="0B/s"
+            android:gravity="center"
+            android:text=""
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="0.334"
-            app:layout_constraintStart_toEndOf="@+id/downloadSize_textView"
+            app:layout_constraintLeft_toRightOf="@+id/divider1"
+            app:layout_constraintRight_toLeftOf="@+id/divider2"
             app:layout_constraintTop_toTopOf="parent" />
-        <!--<TextView-->
-        <!--android:id="@+id/speed_textView"-->
-        <!--android:layout_width="0dp"-->
-        <!--android:layout_height="19dp"-->
-        <!--android:layout_marginTop="8dp"-->
-        <!--android:layout_marginBottom="8dp"-->
-        <!--android:layout_weight="1"-->
-        <!--android:gravity="center_horizontal"-->
-        <!--android:text="100mB/s"-->
-        <!--app:layout_constraintBottom_toBottomOf="parent"-->
-        <!--app:layout_constraintTop_toTopOf="parent"-->
-        <!--tools:layout_editor_absoluteX="157dp" />-->
+
+        <View
+            android:id="@+id/divider2"
+            android:layout_width="1dp"
+            android:layout_height="0dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginBottom="0dp"
+            android:background="#ccc"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toRightOf="@+id/speed_textView"
+            app:layout_constraintRight_toLeftOf="@+id/duration_textView"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
             android:id="@+id/duration_textView"
-            android:layout_width="wrap_content"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:gravity="right"
-            android:paddingRight="3dp"
-            android:text="01:00/20:00"
+            android:gravity="end"
+            android:text=""
+            android:visibility="invisible"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="@+id/download_progressBar"
+            app:layout_constraintLeft_toRightOf="@+id/divider2"
+            app:layout_constraintRight_toRightOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
-        <TextView
-            android:id="@+id/downloadSize_textView"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:paddingLeft="3dp"
-            android:text="54m/100m" />
-
 
     </android.support.constraint.ConstraintLayout>
 </LinearLayout>

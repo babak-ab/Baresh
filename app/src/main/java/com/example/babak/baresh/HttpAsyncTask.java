@@ -12,9 +12,10 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.UnknownHostException;
 
 @SuppressLint("NewApi")
-public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
+public class HttpAsyncTask extends AsyncTask<Void, Integer, Integer> {
 
 
     enum Authenticate{
@@ -39,12 +40,15 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
     private String mUrl;
     private boolean mSuccessful;
     private int mResponseCode;
+    private String mResponseMessage;
     private String mLocation;
    // private Authenticate mAuthenticateType;
     private boolean mAuthenticateEnable;
     private String mLogin;
     private String mPassword;
-    public HttpAsyncTask(HttpDownloadListener listener,boolean authenticateEnable,String username,String password) {
+    public HttpAsyncTask(HttpDownloadListener listener,String url,
+                         boolean authenticateEnable,String username,String password) {
+        mUrl = url;
         mSuccessful = false;
         mListener = listener;
         mResponseCode = 0;
@@ -53,12 +57,11 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
         mPassword = password;
     }
     @Override
-    protected Integer doInBackground(String... urls) {
+    protected Integer doInBackground(Void... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             try {
-                mUrl = urls[0];
-                urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
+                urlConnection = (HttpURLConnection) new URL(mUrl).openConnection();
                 urlConnection.setFollowRedirects(false);
                 urlConnection.setInstanceFollowRedirects(false);
                 urlConnection.setRequestMethod("GET");
@@ -66,6 +69,7 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                 urlConnection.setRequestProperty("Content-Type", "some/type");
                 urlConnection.connect();
                 mResponseCode = urlConnection.getResponseCode();
+                mResponseMessage = urlConnection.getResponseMessage();
                 Log.e("DOWNLOAD2", String.valueOf(mResponseCode));
                 if(mResponseCode == 200){
                     String Content_Length = urlConnection.getHeaderField("Content-Length");
@@ -82,7 +86,7 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                         }
                     } else {
                         // extracts file name from URL
-                        String str = urls[0].toString();
+                        String str = mUrl.toString();
                         mFileName = str.substring(str.lastIndexOf("/") + 1,
                                 str.length());
                     }
@@ -98,6 +102,7 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                     urlConnection.setRequestProperty("Content-Type", "some/type");
                     urlConnection.connect();
                     mResponseCode = urlConnection.getResponseCode();
+                    mResponseMessage = urlConnection.getResponseMessage();
                     Log.e("DOWNLOAD2", String.valueOf(mResponseCode));
                     if(mResponseCode == 200){
                         String Content_Length = urlConnection.getHeaderField("Content-Length");
@@ -114,7 +119,7 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                             }
                         } else {
                             // extracts file name from URL
-                            String str = urls[0].toString();
+                            String str = mUrl.toString();
                             mFileName = str.substring(str.lastIndexOf("/") + 1,
                                     str.length());
                         }
@@ -127,7 +132,7 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                         String www_Authenticate = urlConnection.getHeaderField("WWW-Authenticate");
                         if (www_Authenticate != null) {
                             if (www_Authenticate.contains("Basic")) {
-                                urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
+                                urlConnection = (HttpURLConnection) new URL(mUrl).openConnection();
                                 urlConnection.setFollowRedirects(false);
                                 urlConnection.setInstanceFollowRedirects(false);
                                 urlConnection.setRequestMethod("GET");
@@ -136,6 +141,7 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                                 urlConnection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((mLogin+":"+mPassword).getBytes(), Base64.NO_WRAP));
                                 urlConnection.connect();
                                 mResponseCode = urlConnection.getResponseCode();
+                                mResponseMessage = urlConnection.getResponseMessage();
                                 Log.e("DOWNLOAD2", String.valueOf(mResponseCode));
                                 if(mResponseCode == 200){
                                     String Content_Length = urlConnection.getHeaderField("Content-Length");
@@ -148,7 +154,7 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                                                     disposition.length() - 1);
                                         }
                                     } else {
-                                        String str = urls[0].toString();
+                                        String str = mUrl.toString();
                                         mFileName = str.substring(str.lastIndexOf("/") + 1,
                                                 str.length());
                                     }
@@ -158,7 +164,7 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                                 }
                             }
                             if (www_Authenticate.contains("Digest")) {
-                                urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
+                                urlConnection = (HttpURLConnection) new URL(mUrl).openConnection();
                                 urlConnection.setFollowRedirects(false);
                                 urlConnection.setInstanceFollowRedirects(false);
                                 urlConnection.setRequestMethod("GET");
@@ -169,11 +175,12 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                                 if (!auth.canRespond()) {
                                     mSuccessful = false;
                                 }else{
-                                    urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
+                                    urlConnection = (HttpURLConnection) new URL(mUrl).openConnection();
                                     urlConnection.setRequestProperty(DigestChallengeResponse.HTTP_HEADER_AUTHORIZATION,
                                             auth.getAuthorizationForRequest("GET", urlConnection.getURL().getPath()));
                                     urlConnection.connect();
                                     mResponseCode = urlConnection.getResponseCode();
+                                    mResponseMessage = urlConnection.getResponseMessage();
                                     Log.e("DOWNLOAD2", String.valueOf(mResponseCode));
                                     if(mResponseCode == 200){
                                         mSuccessful = true;
@@ -187,16 +194,22 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
                         mSuccessful = false;
                     }
                 }
+            } catch (UnknownHostException exception) {
+                Log.e("PlaceholderFragment", "Error ", exception);
+                mResponseMessage = "آدرس موجود نمی باشد";
+                mSuccessful = false;
+                return 0;
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
+                mResponseMessage = e.toString();
                 mSuccessful = false;
-                return mResponseCode;
+                return 0;
             } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
             }
-        return mResponseCode;
+        return 1;
     }
     @Override
     protected void onPostExecute(Integer integer) {
@@ -227,5 +240,7 @@ public class HttpAsyncTask extends AsyncTask<String, Integer, Integer> {
     public String getPassword() { return mPassword; }
 
     public void setPassword(String password) { mPassword = password; }
+
+    public String getResponseMessage() { return mResponseMessage; }
 
 }

@@ -57,46 +57,42 @@ public class DownloadAdapter extends BaseAdapter {
 
         View rowView = inflater.inflate(R.layout.download_row_layout, parent, false);
 
+        final ProgressBar progress = (ProgressBar)rowView.findViewById(R.id.download_progressBar);
+        final TextView fileName = (TextView) rowView.findViewById(R.id.fileName_textView) ;
         final ImageView imageView = (ImageView) rowView.findViewById(R.id.imageView);
+        final TextView speedTextView = (TextView)rowView.findViewById(R.id.speed_textView);
+        final TextView downloadSize = (TextView)rowView.findViewById(R.id.downloadSize_textView);
+        final TextView duration = (TextView)rowView.findViewById(R.id.duration_textView);
+        fileName.setText(dataModel.getFileName());
         if(dataModel.getStatus() == Downloader.Status.PAUSE){
             imageView.setImageResource(android.R.drawable.ic_media_pause);
-        }else if(dataModel.getStatus() == Downloader.Status.RUNNING){
+        }else if(dataModel.getStatus() == Downloader.Status.DOWNLOADING){
+            duration.setVisibility(View.VISIBLE);
+            downloadSize.setVisibility(View.VISIBLE);
             imageView.setImageResource(android.R.drawable.ic_media_play);
+            if(dataModel.getFileSize() > 0)
+                progress.setProgress((int)(dataModel.getDownloadedSize() / (float)dataModel.getFileSize() * 100.0));
+            String speedStr = getSizeToString(dataModel.getSpeed()) +"/s";
+            speedTextView.setText(speedStr);
+            downloadSize.setText(getSizeToString(dataModel.getDownloadedSize())+"/"+ getSizeToString(dataModel.getFileSize()));
+            String duStr;
+            long time = dataModel.getRemindTime();
+            if(time == -1){
+                duStr = "--:--:--";
+            }else{
+                duStr = getTimeToString((Long) time);
+            }
+            String tiStr =  getTimeToString(dataModel.getDurationTime());
+            duration.setText(tiStr + "/" + duStr);
+        }else if(dataModel.getStatus() == Downloader.Status.CONNECTING){
+            speedTextView.setText("در حال اتصال...");
+        }else if(dataModel.getStatus() == Downloader.Status.START){
+            duration.setVisibility(View.VISIBLE);
+            downloadSize.setVisibility(View.VISIBLE);
+        }else if(dataModel.getStatus() == Downloader.Status.ERROR){
+            speedTextView.setText("فایل قابل دانلود نمی باشد");
         }
-        final TextView fileName = (TextView) rowView.findViewById(R.id.fileName_textView) ;
-        fileName.setText(dataModel.getFileName());
 
-        final ProgressBar progress = (ProgressBar)rowView.findViewById(R.id.download_progressBar);
-        if(dataModel.getFileSize() > 0)
-            progress.setProgress((int)(dataModel.getDownloadedSize() / (float)dataModel.getFileSize() * 100.0));
-
-        String speedStr = getSizeToString(dataModel.getSpeed()) +"/s";
-        final TextView speedTextView = (TextView)rowView.findViewById(R.id.speed_textView);
-        speedTextView.setText(speedStr);
-
-        final TextView downloadSize = (TextView)rowView.findViewById(R.id.downloadSize_textView);
-        downloadSize.setText(getSizeToString(dataModel.getDownloadedSize())+"/"+
-                getSizeToString(dataModel.getFileSize()));
-
-
-        String duStr;
-        long time = dataModel.getRemindTime();
-        if(time == -1){
-             duStr = "--:--:--";
-        }else{
-             duStr = getTimeToString((Long) time);
-        }
-        String tiStr =  getTimeToString(dataModel.getDurationTime());
-
-        final TextView duration = (TextView)rowView.findViewById(R.id.duration_textView);
-        duration.setText(tiStr + "/" + duStr);
-
-//        imageView.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                imageView.setImageResource(android.R.drawable.ic_media_pause);
-//            }
-//        });
         return rowView;
     }
     public String getSizeToString(long size){

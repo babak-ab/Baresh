@@ -166,9 +166,10 @@ public class MainActivity extends AppCompatActivity implements
                 //dialogButton.setOnClickListener(new AddDialogButtonClicked(dialog,(String)text.getText().toString()));
                 dialogButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        mHeadAsyncTask = new HttpAsyncTask(MainActivity.this,checkBox_authentication.isChecked(),
-                                editText_login.getText().toString(),editText_password.getText().toString());
-                        mHeadAsyncTask.execute((String)text.getText().toString());
+                        mHeadAsyncTask = new HttpAsyncTask(MainActivity.this,
+                                text.getText().toString(),checkBox_authentication.isChecked(),
+                               editText_login.getText().toString(),editText_password.getText().toString());
+                        mHeadAsyncTask.execute();
                         mCurrentUrl = text.getText().toString();
                         mInfoDialog = new DownloadInfoDialog(mContext,(String)text.getText().toString());
                         mInfoDialog.setListener(MainActivity.this);
@@ -188,8 +189,6 @@ public class MainActivity extends AppCompatActivity implements
     @Override
     public void onDownloadAccepted() {
         mInfoDialog.cancel();
-        boolean head_successful = mHeadAsyncTask.isSuccessful();
-        int result = mHeadAsyncTask.responseCode();
         mHeadAsyncTask.cancel(true);
         mDownloadManagerService.createDownload(mHeadAsyncTask.getUrl(),checkBox_authentication.isChecked(),
                 editText_login.getText().toString(),editText_password.getText().toString());
@@ -203,7 +202,6 @@ public class MainActivity extends AppCompatActivity implements
 
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
-
         mDownloadManagerService = ((DownloadManagerService.MyBinder)iBinder).getService();
         mDownloadManagerService.setCallBack(this);
     }

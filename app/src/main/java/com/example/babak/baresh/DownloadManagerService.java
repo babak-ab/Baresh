@@ -22,7 +22,7 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
     private HttpAsyncTask mHeadAsyncTask;
     private HashMap<Long,Downloader> mDownloaderHashMap;
     private DBHelper mdb;
-    private Long mCreateDownloadId;
+    private long mCreateDownloadId;
     private MyBinder mLocalBinder = new MyBinder();
     private CallBack mCallBack;
     public DownloadManagerService() {
@@ -50,13 +50,11 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
         if(mCallBack != null){
             mCallBack.onNotifyDataSetChanged();
         }
-        //notifyDataSetChanged();
     }
     public void onDownloadStart(Long downloadId) {
         if(mCallBack != null){
             mCallBack.onNotifyDataSetChanged();
         }
-       // notifyDataSetChanged();
     }
     public void onDownloadReject(Long downloadId) {
         for (Map.Entry<Long,TaskModel> entry : mDownloaderHashMap.get(downloadId).getTasksModel().entrySet()) {
@@ -69,7 +67,6 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
         if(mCallBack != null){
             mCallBack.onNotifyDataSetChanged();
         }
-       // notifyDataSetChanged();
     }
     public void onDownloadFinished(Long downloadId) {
         mdb.updateDownloadedLink(downloadId, mDownloaderHashMap.get(downloadId).getDownloadedSize());
@@ -81,7 +78,6 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
         if(mCallBack != null){
             mCallBack.onNotifyDataSetChanged();
         }
-       // notifyDataSetChanged();
     }
     public void onDownloadPause(Long downloadId) {
         mdb.updateDownloadedLink(downloadId, mDownloaderHashMap.get(downloadId).getDownloadedSize());
@@ -93,15 +89,10 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
         if(mCallBack != null){
             mCallBack.onNotifyDataSetChanged();
         }
-//        for(int i = 0;i < tasks.size(); i++){
-//            mdb.updateTask(tasks.get(i).getTaskId(),
-//                    tasks.get(i).getStart(),tasks.get(i).getEnd());
-//        }
-        //notifyDataSetChanged();
     }
-    private void createDownload(String url,String filename,Long fileSize) {
-        mCreateDownloadId = mdb.insertLink("",url,0,0);
-        Downloader downloader = new Downloader(mCreateDownloadId,url,filename,this);
+    private void updateDownload(long downloadId,Long fileSize) {
+        Downloader downloader = mDownloaderHashMap.get(mCreateDownloadId);
+        downloader.setStatus(Downloader.Status.DOWNLOADING);
         downloader.setFileSize(fileSize);
         downloader.setDownloaded(0);
         HashMap<Long, TaskModel> task_list = new HashMap<>(4);
@@ -151,33 +142,34 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
             task_list.put(taskId, task);
         }
         downloader.setDownloadTask(task_list);
-        mDownloaderHashMap.put(mCreateDownloadId, downloader);
         mdb.updateSizeLink(mCreateDownloadId, fileSize);
-        mdb.updateLink(mCreateDownloadId, mDownloaderHashMap.get(mCreateDownloadId).getFileName(),
-                mDownloaderHashMap.get(mCreateDownloadId).getUrl());
-        //mdb.deleteLink(mCreateDownloadId);
-        // notifyDataSetChanged();
-        if (mCallBack != null) {
-            mCallBack.onNotifyDataSetChanged();
-        }
         downloader.startDownload();
     }
     public void createDownload(String url,boolean isAuthentication,String username,String password) {
-        mHeadAsyncTask = new HttpAsyncTask(this,isAuthentication,username,password);
-        mHeadAsyncTask.execute(url);
+        mCreateDownloadId = mdb.insertLink("",url,0,0);
+        String filename = url.substring(url.lastIndexOf("/") + 1,
+                url.length());
+        Downloader downloader = new Downloader(mCreateDownloadId,url,filename,this);
+        downloader.setStatus(Downloader.Status.CONNECTING);
+        mDownloaderHashMap.put(mCreateDownloadId, downloader);
+        mdb.updateLink(mCreateDownloadId, mDownloaderHashMap.get(mCreateDownloadId).getFileName(),
+                mDownloaderHashMap.get(mCreateDownloadId).getUrl());
+        if (mCallBack != null) {
+            mCallBack.onNotifyDataSetChanged();
+        }
+        mHeadAsyncTask = new HttpAsyncTask(this,url,isAuthentication,username,password);
+        mHeadAsyncTask.execute();
     }
     @Override
     public void onCreate() {
         super.onCreate();
         mdb = new DBHelper(getApplicationContext(),this);
         mDownloaderHashMap = mdb.getAllLinks();
-        //mCallBack.onNotifyDataSetChanged();
         startServiceWithNotification();
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //TODO do something useful
         if (intent != null && intent.getAction().equals("START")) {
             startServiceWithNotification();
         }
@@ -189,7 +181,6 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
         isServiceRunning = false;
         super.onDestroy();
     }
-
 
     void startServiceWithNotification() {
         if (isServiceRunning) return;
@@ -230,11 +221,16 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
     public void onHeadFinished(int result) {
         switch (result){
             case 200:
-                createDownload(mHeadAsyncTask.getUrl(),mHeadAsyncTask.getFileName(),
-                        mHeadAsyncTask.getFileSize());
+                updateDownload(mCreateDownloadId,mHeadAsyncTask.getFileSize());
                 break;
             default:
-
+                Downloader downloader = mDownloaderHashMap.get(mCreateDownloadId);
+                downloader.setStatus(Downloader.Status.ERROR);
+                downloader.setError(result);
+                downloader.setErrorString(mHeadAsyncTask.getResponseMessage());
+                if (mCallBack != null) {
+                    mCallBack.onNotifyDataSetChanged();
+                }
                 break;
         }
     }
