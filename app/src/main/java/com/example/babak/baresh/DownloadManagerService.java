@@ -1,5 +1,6 @@
 package com.example.babak.baresh;
 
+import android.app.Dialog;
 import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.Service;
@@ -10,6 +11,9 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.support.annotation.Nullable;
 import android.util.Log;
+import android.view.View;
+import android.widget.Button;
+import android.widget.EditText;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -223,6 +227,11 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
             case 200:
                 updateDownload(mCreateDownloadId,mHeadAsyncTask.getFileSize());
                 break;
+            case 401:
+                if (mCallBack != null) {
+                    mCallBack.onAuthenticationRequest(mCreateDownloadId);
+                }
+                break;
             default:
                 Downloader downloader = mDownloaderHashMap.get(mCreateDownloadId);
                 downloader.setStatus(Downloader.Status.ERROR);
@@ -234,9 +243,14 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
                 break;
         }
     }
-
+    public void authenticationAccepted(long id,String username,String password){
+        mHeadAsyncTask = new HttpAsyncTask(DownloadManagerService.this,mDownloaderHashMap.get(id).getUrl(),
+                true,username,password);
+        mHeadAsyncTask.execute();
+    }
     public interface CallBack {
         void onNotifyDataSetChanged();
+        void onAuthenticationRequest(long id);
     }
     public void setCallBack(CallBack callBack) {
         mCallBack = callBack;

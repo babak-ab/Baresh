@@ -34,8 +34,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MainActivity extends AppCompatActivity implements
-        DownloadInfoDialogListener,HttpDownloadListener,ServiceConnection, DownloadManagerService.CallBack {
+public class MainActivity extends AppCompatActivity implements ServiceConnection, DownloadManagerService.CallBack {
 
     private Context mContext;
     //private PopupWindow mPopupWindow;
@@ -44,10 +43,10 @@ public class MainActivity extends AppCompatActivity implements
     //private Downloader download;
     private String mCurrentUrl;
     private DownloadAdapter mDownloadAdapter;
-    private HttpAsyncTask mHeadAsyncTask;
+    //private HttpAsyncTask mHeadAsyncTask;
     private ArrayList<Downloader> dataModels;
     private DownloadManagerService mDownloadManagerService;
-    private DownloadInfoDialog mInfoDialog;
+    //private DownloadInfoDialog mInfoDialog;
     private EditText editText_login;
     private EditText editText_password;
     private CheckBox checkBox_authentication;
@@ -134,27 +133,27 @@ public class MainActivity extends AppCompatActivity implements
                 final Dialog dialog = new Dialog(MainActivity.this);
                 dialog.setContentView(R.layout.add_dialog_layout);
                 dialog.setTitle("Add link for download...");
-                final LinearLayout linearLayout = (LinearLayout)dialog.findViewById(R.id.linearLayout_authentication);
-                editText_login = (EditText)dialog.findViewById(R.id.editText_username);
-                editText_password = (EditText)dialog.findViewById(R.id.editText_password);
-                checkBox_authentication = (CheckBox)dialog.findViewById(R.id.checkBox_authentication);
-                checkBox_authentication.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if(checkBox_authentication.isChecked()){
-                            linearLayout.setVisibility(View.VISIBLE);
-                        }else{
-                            linearLayout.setVisibility(View.GONE);
-                        }
-                    }
-                });
+//                final LinearLayout linearLayout = (LinearLayout)dialog.findViewById(R.id.linearLayout_authentication);
+//                editText_login = (EditText)dialog.findViewById(R.id.editText_username);
+//                editText_password = (EditText)dialog.findViewById(R.id.editText_password);
+//                checkBox_authentication = (CheckBox)dialog.findViewById(R.id.checkBox_authentication);
+//                checkBox_authentication.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        if(checkBox_authentication.isChecked()){
+//                            linearLayout.setVisibility(View.VISIBLE);
+//                        }else{
+//                            linearLayout.setVisibility(View.GONE);
+//                        }
+//                    }
+//                });
 
                 final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
                // text.setText("http://techslides.com/demos/sample-videos/small.mp4");
-                text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
+                //text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
                 //text.setText("http://ipv4.download.thinkbroadband.com/1GB.zip");
                 //text.setText("https://httpstat.us/303");
-                //text.setText("https://jigsaw.w3.org/HTTP/Digest/");
+                text.setText("https://jigsaw.w3.org/HTTP/Digest/");
                 //text.setText("http://httpbin.org/basic-auth/path/path");
                 //text.setText("http://det.jrl.police.ir/backend/uploads/701726543874abcd5515189a1ec68423b27f7d28.pdf");
                 //https://speed.hetzner.de/10GB.bin
@@ -166,39 +165,38 @@ public class MainActivity extends AppCompatActivity implements
                 //dialogButton.setOnClickListener(new AddDialogButtonClicked(dialog,(String)text.getText().toString()));
                 dialogButton.setOnClickListener(new View.OnClickListener() {
                     public void onClick(View v) {
-                        mHeadAsyncTask = new HttpAsyncTask(MainActivity.this,
-                                text.getText().toString(),checkBox_authentication.isChecked(),
-                               editText_login.getText().toString(),editText_password.getText().toString());
-                        mHeadAsyncTask.execute();
-                        mCurrentUrl = text.getText().toString();
-                        mInfoDialog = new DownloadInfoDialog(mContext,(String)text.getText().toString());
-                        mInfoDialog.setListener(MainActivity.this);
-                        mInfoDialog.show();
+                       // mHeadAsyncTask = new HttpAsyncTask(MainActivity.this,
+                       //         text.getText().toString(),checkBox_authentication.isChecked(),
+                       //        editText_login.getText().toString(),editText_password.getText().toString());
+                       // mHeadAsyncTask.execute();
+                       // mCurrentUrl = text.getText().toString();
+                       // mInfoDialog = new DownloadInfoDialog(mContext,(String)text.getText().toString());
+                       // mInfoDialog.setListener(MainActivity.this);
+                       // mInfoDialog.show();
+                        mDownloadManagerService.createDownload(text.getText().toString(),false,"","");
                         dialog.cancel();
                     }
                 });
                 dialog.show();
-
-
             default:
                 break;
         }
         return true;
     }
 
-    @Override
-    public void onDownloadAccepted() {
-        mInfoDialog.cancel();
-        mHeadAsyncTask.cancel(true);
-        mDownloadManagerService.createDownload(mHeadAsyncTask.getUrl(),checkBox_authentication.isChecked(),
-                editText_login.getText().toString(),editText_password.getText().toString());
-    }
-
-    @Override
-    public void onDownloadReject() {
-        mInfoDialog.cancel();
-        mHeadAsyncTask.cancel(true);
-    }
+//    @Override
+//    public void onDownloadAccepted() {
+//        //mInfoDialog.cancel();
+//        //mHeadAsyncTask.cancel(true);
+//        //mDownloadManagerService.createDownload(mHeadAsyncTask.getUrl(),checkBox_authentication.isChecked(),
+//        //        editText_login.getText().toString(),editText_password.getText().toString());
+//    }
+//
+//    @Override
+//    public void onDownloadReject() {
+//       // mInfoDialog.cancel();
+//        //mHeadAsyncTask.cancel(true);
+//    }
 
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
@@ -224,32 +222,51 @@ public class MainActivity extends AppCompatActivity implements
     }
 
     @Override
-    public void onHeadFinished(int result) {
-        switch (result){
-            case 200:
-                if (mInfoDialog != null) {
-                    if (mInfoDialog.isShowing()) {
-                        mInfoDialog.setFileSizeChanged(mHeadAsyncTask.getFileSize());
-                    }
-                }
-                break;
-            case 0:
-                break;
-            case 301:
-            case 302:
-            case 303:
-                if(mHeadAsyncTask.getLocation() != null){
-                    if (mInfoDialog != null) {
-                        if (mInfoDialog.isShowing()) {
-                            mInfoDialog.setUrlChanged(mHeadAsyncTask.getLocation());
-                        }
-                    }
-                }
-                break;
-            default:
-                break;
-        }
+    public void onAuthenticationRequest(final long id) {
+        final Dialog dialog = new Dialog(this);
+        dialog.setContentView(R.layout.login_layout);
+        dialog.setTitle("Add link for download...");
+        final EditText editText_login = (EditText)dialog.findViewById(R.id.editText_username);
+        final EditText editText_password = (EditText)dialog.findViewById(R.id.editText_password);
+        Button button_accept = (Button)dialog.findViewById(R.id.button_authAccept);
+        button_accept.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                mDownloadManagerService.authenticationAccepted(id,editText_login.getText().toString(),
+                        editText_password.getText().toString() );
+                dialog.cancel();
+            }
+        });
+        dialog.show();
     }
+//
+//    @Override
+//    public void onHeadFinished(int result) {
+//        switch (result){
+//            case 200:
+//                if (mInfoDialog != null) {
+//                    if (mInfoDialog.isShowing()) {
+//                        mInfoDialog.setFileSizeChanged(mHeadAsyncTask.getFileSize());
+//                    }
+//                }
+//                break;
+//            case 0:
+//                break;
+//            case 301:
+//            case 302:
+//            case 303:
+//                if(mHeadAsyncTask.getLocation() != null){
+//                    if (mInfoDialog != null) {
+//                        if (mInfoDialog.isShowing()) {
+//                            mInfoDialog.setUrlChanged(mHeadAsyncTask.getLocation());
+//                        }
+//                    }
+//                }
+//                break;
+//            default:
+//                break;
+//        }
+//    }
 
     class AddDialogButtonClicked  implements View.OnClickListener {
         private String mText;
