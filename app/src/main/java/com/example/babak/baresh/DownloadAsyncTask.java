@@ -9,31 +9,41 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
+import java.net.UnknownHostException;
 
-public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
+public class DownloadAsyncTask extends AsyncTask<String, Integer, Boolean> {
 
+    enum Error{
+        ERROR_NO_ERROR,
+        ERROR_TIMEOUT,
+        ERROR_HOST_UNKNOWN
+    }
     private static final String TAG = "MyActivity";
     private Downloader mDownloader;
     private Long mStartByte;
     private Long mEndByte;
     private Long mLastByte;
     private long mTaskId;
+    private Error mError;
     File rootDir = Environment.getExternalStorageDirectory();
     public DownloadAsyncTask(long taskId,long startByte,long endByte,Downloader downloader) {
         mDownloader = downloader;
         mTaskId = taskId;
         mStartByte = startByte;
         mEndByte = endByte;
+        mError = Error.ERROR_NO_ERROR;
     }
     @Override
-    protected Integer doInBackground(String... urls) {
+    protected Boolean doInBackground(String... urls) {
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         try {
             urlConnection = (HttpURLConnection) new URL(urls[0]).openConnection();
             urlConnection.setRequestMethod("GET");
             urlConnection.setRequestProperty("Range","bytes="+mStartByte.toString()+"-"+mEndByte.toString()+"");
+            urlConnection.setConnectTimeout(15000);
             urlConnection.connect();
             int responseCode = urlConnection.getResponseCode();
             if(responseCode == 200 || responseCode == 206){
@@ -54,18 +64,25 @@ public class DownloadAsyncTask extends AsyncTask<String, Integer, Integer> {
                 }
                store.close();
             }
+        } catch (SocketTimeoutException e) {
+            mError = Error.ERROR_TIMEOUT;
+            return false;
+        }
+        catch (UnknownHostException e) {
+            return false;
         } catch (IOException e) {
-            Log.e("PlaceholderFragment", "Error ", e);
-            return -1;
+            mError = Error.ERROR_HOST_UNKNOWN;
+            return false;
         } finally {
             if (urlConnection != null) {
                 urlConnection.disconnect();
             }
         }
-        return 0;
+        mError = Error.ERROR_NO_ERROR;
+        return true;
     }
     @Override
-    protected void onPostExecute(Integer result) {
+    protected void onPostExecute(Boolean result) {
         super.onPostExecute(result);
         mDownloader.onDownloadFinished(mTaskId);
     }

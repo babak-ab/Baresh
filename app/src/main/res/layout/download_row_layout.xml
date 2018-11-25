@@ -18,7 +18,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            app:srcCompat="@android:drawable/ic_media_play" />
+            app:srcCompat="@drawable/ic_play_arrow_green_900_24dp" />
 
         <TextView
             android:id="@+id/fileName_textView"
@@ -26,6 +26,8 @@
             android:layout_height="match_parent"
             android:layout_weight="3"
             android:gravity="center_vertical"
+            android:maxLines="1"
+            android:ellipsize="end"
             android:text="FIleName" />
     </LinearLayout>
 
@@ -40,11 +42,12 @@
             android:id="@+id/download_progressBar"
             style="@android:style/Widget.ProgressBar.Horizontal"
             android:layout_width="match_parent"
-            android:layout_height="20dp"
-            android:layout_weight="3"
+            android:layout_height="wrap_content"
+            android:indeterminate="false"
             android:max="100"
             android:min="0"
             android:progress="0"
+            android:progressDrawable="@drawable/custom_progress_bar"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
 
@@ -52,6 +55,9 @@
             android:id="@+id/downloadSize_textView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:layout_marginTop="1dp"
+            android:layout_marginBottom="1dp"
             android:gravity="start"
             android:text=""
             android:visibility="invisible"
@@ -101,6 +107,9 @@
             android:id="@+id/duration_textView"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
+            android:layout_marginTop="1dp"
+            android:layout_marginRight="5dp"
+            android:layout_marginBottom="1dp"
             android:gravity="end"
             android:text=""
             android:visibility="invisible"

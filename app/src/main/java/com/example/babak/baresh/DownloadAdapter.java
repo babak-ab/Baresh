@@ -65,11 +65,11 @@ public class DownloadAdapter extends BaseAdapter {
         final TextView duration = (TextView)rowView.findViewById(R.id.duration_textView);
         fileName.setText(dataModel.getFileName());
         if(dataModel.getStatus() == Downloader.Status.PAUSE){
-            imageView.setImageResource(android.R.drawable.ic_media_pause);
+            imageView.setImageResource(R.drawable.ic_play_arrow_green_900_24dp);
         }else if(dataModel.getStatus() == Downloader.Status.DOWNLOADING){
             duration.setVisibility(View.VISIBLE);
             downloadSize.setVisibility(View.VISIBLE);
-            imageView.setImageResource(android.R.drawable.ic_media_play);
+            imageView.setImageResource(R.drawable.ic_pause_yellow_900_24dp);
             if(dataModel.getFileSize() > 0)
                 progress.setProgress((int)(dataModel.getDownloadedSize() / (float)dataModel.getFileSize() * 100.0));
             String speedStr = getSizeToString(dataModel.getSpeed()) +"/s";
@@ -91,6 +91,14 @@ public class DownloadAdapter extends BaseAdapter {
             downloadSize.setVisibility(View.VISIBLE);
         }else if(dataModel.getStatus() == Downloader.Status.ERROR){
             speedTextView.setText("فایل قابل دانلود نمی باشد");
+        }else if(dataModel.getStatus() == Downloader.Status.FINISH){
+            imageView.setImageResource(R.drawable.ic_stop_red_900_24dp);
+            speedTextView.setText("دانلود پایان یافت");
+            progress.setProgress(100);
+            downloadSize.setVisibility(View.VISIBLE);
+            duration.setVisibility(View.VISIBLE);
+            duration.setText("--:--:--/--:--:--");
+            downloadSize.setText(getSizeToString(dataModel.getDownloadedSize())+"/"+ getSizeToString(dataModel.getFileSize()));
         }
 
         return rowView;

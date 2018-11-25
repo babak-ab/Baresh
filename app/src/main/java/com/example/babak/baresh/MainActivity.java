@@ -10,8 +10,13 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
 import android.content.pm.PackageManager;
+import android.net.ConnectivityManager;
+import android.net.Uri;
 import android.os.Build;
 import android.os.IBinder;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -31,25 +36,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
+import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection, DownloadManagerService.CallBack {
 
     private Context mContext;
-    //private PopupWindow mPopupWindow;
-    //private LinearLayout mLinearLayout;
-    //private Button button;
-    //private Downloader download;
-    private String mCurrentUrl;
     private DownloadAdapter mDownloadAdapter;
-    //private HttpAsyncTask mHeadAsyncTask;
     private ArrayList<Downloader> dataModels;
     private DownloadManagerService mDownloadManagerService;
-    //private DownloadInfoDialog mInfoDialog;
-    private EditText editText_login;
-    private EditText editText_password;
-    private CheckBox checkBox_authentication;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,7 +77,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(final AdapterView<?> adapterView, View view, final int position, long id) {
-                //Log.e("PlaceholderFragment","HOLD");
                 String[] animals = {"Delete Link","Delete Link And File"};
                 final Downloader data = (Downloader) adapterView.getItemAtPosition(position);
                 new AlertDialog.Builder(MainActivity.this)
@@ -88,13 +85,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                             @Override
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 switch (i) {
-                                    case 0: // horse
-                                        //mDownloadManager.removeDownload(data.getDownloadId());
+                                    case 0:
                                         mDownloadManagerService.removeDownload(data.getDownloadId());
                                         break;
                                     case 1:
                                         Downloader data = (Downloader) adapterView.getItemAtPosition(position);
-                                        //mDownloadManager.removeDownload(data.getDownloadId());
                                         mDownloadManagerService.removeDownload(data.getDownloadId());
                                         File file = data.getFile();
                                         if (file.exists()) {
@@ -110,15 +105,16 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
                         })
                         .create()
                         .show();
-                // IF false -> call onItemClick in Item Click Release
                 return true;
             }
         });
         getApplicationContext().bindService(new Intent(getApplicationContext(), DownloadManagerService.class), this,BIND_AUTO_CREATE);
-       // Intent startIntent = new Intent(getApplicationContext(), DownloadManagerService.class);
-        //bindService(startIntent, this, BIND_AUTO_CREATE);
-       // startIntent.setAction("START");
-        //startService(startIntent);
+
+        Intent intent = getIntent();
+        Uri data = intent.getData();
+        if(data != null){
+            showAddDialog(data.toString());
+        }
 
     }
     @Override
@@ -126,78 +122,40 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         getMenuInflater().inflate(R.menu.menu_main, menu);
         return true;
     }
+    public void showAddDialog(String url){
+        final Dialog dialog = new Dialog(MainActivity.this);
+        dialog.setContentView(R.layout.add_dialog_layout);
+        dialog.setTitle("Add link for download...");
+        final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
+        // text.setText("http://techslides.com/demos/sample-videos/small.mp4");
+        //text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
+        //text.setText("http://ipv4.download.thinkbroadband.com/1GB.zip");
+        //text.setText("https://httpstat.us/303");
+        //text.setText("https://jigsaw.w3.org/HTTP/Digest/");
+        //text.setText("http://httpbin.org/basic-auth/path/path");
+        //text.setText("http://det.jrl.police.ir/backend/uploads/701726543874abcd5515189a1ec68423b27f7d28.pdf");
+        //if(url == "")
+        //    text.setText("http://techslides.com/demos/sample-videos/small.mp4");
+        text.setText(url);
+        Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
+        dialogButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                mDownloadManagerService.createDownload(text.getText().toString(),false,"","");
+                dialog.cancel();
+            }
+        });
+        dialog.show();
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_add:
-                final Dialog dialog = new Dialog(MainActivity.this);
-                dialog.setContentView(R.layout.add_dialog_layout);
-                dialog.setTitle("Add link for download...");
-//                final LinearLayout linearLayout = (LinearLayout)dialog.findViewById(R.id.linearLayout_authentication);
-//                editText_login = (EditText)dialog.findViewById(R.id.editText_username);
-//                editText_password = (EditText)dialog.findViewById(R.id.editText_password);
-//                checkBox_authentication = (CheckBox)dialog.findViewById(R.id.checkBox_authentication);
-//                checkBox_authentication.setOnClickListener(new View.OnClickListener() {
-//                    @Override
-//                    public void onClick(View v) {
-//                        if(checkBox_authentication.isChecked()){
-//                            linearLayout.setVisibility(View.VISIBLE);
-//                        }else{
-//                            linearLayout.setVisibility(View.GONE);
-//                        }
-//                    }
-//                });
-
-                final TextView text = (TextView) dialog.findViewById(R.id.editText_address);
-               // text.setText("http://techslides.com/demos/sample-videos/small.mp4");
-                //text.setText("http://ipv4.download.thinkbroadband.com/10MB.zip");
-                //text.setText("http://ipv4.download.thinkbroadband.com/1GB.zip");
-                //text.setText("https://httpstat.us/303");
-                text.setText("https://jigsaw.w3.org/HTTP/Digest/");
-                //text.setText("http://httpbin.org/basic-auth/path/path");
-                //text.setText("http://det.jrl.police.ir/backend/uploads/701726543874abcd5515189a1ec68423b27f7d28.pdf");
-                //https://speed.hetzner.de/10GB.bin
-                //text.setText("http://dl.hastidl.me/data/Friends.S01.E03.Hastidl.mkv");
-                //text.setText("https://host2.rjmusicmedia.com/media/podcast/mp3-192/Abo-Atash-109.mp3");
-                //text.setText("http://ftp2.nluug.nl/languages/qt/official_releases/qt-installer-framework/3.0.4/QtInstallerFramework-win-x86.exe")   ;
-                Button dialogButton = (Button) dialog.findViewById(R.id.button_accept);
-                // if button is clicked, close the custom dialog
-                //dialogButton.setOnClickListener(new AddDialogButtonClicked(dialog,(String)text.getText().toString()));
-                dialogButton.setOnClickListener(new View.OnClickListener() {
-                    public void onClick(View v) {
-                       // mHeadAsyncTask = new HttpAsyncTask(MainActivity.this,
-                       //         text.getText().toString(),checkBox_authentication.isChecked(),
-                       //        editText_login.getText().toString(),editText_password.getText().toString());
-                       // mHeadAsyncTask.execute();
-                       // mCurrentUrl = text.getText().toString();
-                       // mInfoDialog = new DownloadInfoDialog(mContext,(String)text.getText().toString());
-                       // mInfoDialog.setListener(MainActivity.this);
-                       // mInfoDialog.show();
-                        mDownloadManagerService.createDownload(text.getText().toString(),false,"","");
-                        dialog.cancel();
-                    }
-                });
-                dialog.show();
+                showAddDialog("");
             default:
                 break;
         }
         return true;
     }
-
-//    @Override
-//    public void onDownloadAccepted() {
-//        //mInfoDialog.cancel();
-//        //mHeadAsyncTask.cancel(true);
-//        //mDownloadManagerService.createDownload(mHeadAsyncTask.getUrl(),checkBox_authentication.isChecked(),
-//        //        editText_login.getText().toString(),editText_password.getText().toString());
-//    }
-//
-//    @Override
-//    public void onDownloadReject() {
-//       // mInfoDialog.cancel();
-//        //mHeadAsyncTask.cancel(true);
-//    }
-
     @Override
     public void onServiceConnected(ComponentName componentName, IBinder iBinder) {
         mDownloadManagerService = ((DownloadManagerService.MyBinder)iBinder).getService();
@@ -220,7 +178,32 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
             });
 
     }
+    @Override
+    public void onNetworkDisconnected(){
+        final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.activity_main_ll);
+        final Snackbar snackbar = Snackbar
+                .make(linearLayout, "شبکه قطع می باشد", Snackbar.LENGTH_INDEFINITE)
+                .setAction("دوباره", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                    }
+                });
 
+        snackbar.show();
+    }
+    @Override
+    public void onInternetDisconnected(){
+        final LinearLayout linearLayout = (LinearLayout) findViewById(R.id.activity_main_ll);
+        final Snackbar snackbar = Snackbar
+                .make(linearLayout, "اینترنت قطع می باشد", Snackbar.LENGTH_INDEFINITE)
+                .setAction("دوباره", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                    }
+                });
+
+        snackbar.show();
+    }
     @Override
     public void onAuthenticationRequest(final long id) {
         final Dialog dialog = new Dialog(this);
@@ -239,35 +222,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         });
         dialog.show();
     }
-//
-//    @Override
-//    public void onHeadFinished(int result) {
-//        switch (result){
-//            case 200:
-//                if (mInfoDialog != null) {
-//                    if (mInfoDialog.isShowing()) {
-//                        mInfoDialog.setFileSizeChanged(mHeadAsyncTask.getFileSize());
-//                    }
-//                }
-//                break;
-//            case 0:
-//                break;
-//            case 301:
-//            case 302:
-//            case 303:
-//                if(mHeadAsyncTask.getLocation() != null){
-//                    if (mInfoDialog != null) {
-//                        if (mInfoDialog.isShowing()) {
-//                            mInfoDialog.setUrlChanged(mHeadAsyncTask.getLocation());
-//                        }
-//                    }
-//                }
-//                break;
-//            default:
-//                break;
-//        }
-//    }
-
     class AddDialogButtonClicked  implements View.OnClickListener {
         private String mText;
         private Dialog mDialog;
@@ -278,9 +232,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         @Override
         public void onClick(View v) {
             mDialog.dismiss();
-           // boolean result = mDownloadManagerService.createDownload(this.mText);
-            //if(result == false)
-            //   Toast.makeText(MainActivity.this,"Link is duplicate",Toast.LENGTH_LONG).show();
         }
     }
     public  boolean isStoragePermissionGranted() {

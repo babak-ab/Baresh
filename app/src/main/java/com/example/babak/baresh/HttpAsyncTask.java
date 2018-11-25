@@ -11,16 +11,20 @@ import com.albroco.barebonesdigest.DigestChallengeResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.SocketTimeoutException;
 import java.net.URL;
 import java.net.UnknownHostException;
+import java.util.concurrent.TimeoutException;
 
 @SuppressLint("NewApi")
-public class HttpAsyncTask extends AsyncTask<Void, Integer, Integer> {
+public class HttpAsyncTask extends AsyncTask<Void, Integer, Boolean> {
 
-
+    enum Error{
+        ERROR_NO_ERROR,
+        ERROR_TIMEOUT,
+        ERROR_HOST_UNKNOWN
+    }
     enum Authenticate{
-        Authenticate_Failed,
-        Authenticate_NotValid,
         Authenticate_Basic,
         Authenticate_Bearer,
         Authenticate_Digest,
@@ -42,10 +46,11 @@ public class HttpAsyncTask extends AsyncTask<Void, Integer, Integer> {
     private int mResponseCode;
     private String mResponseMessage;
     private String mLocation;
-   // private Authenticate mAuthenticateType;
+    private Authenticate mAuthenticateType;
     private boolean mAuthenticateEnable;
     private String mLogin;
     private String mPassword;
+    private Error mError;
     public HttpAsyncTask(HttpDownloadListener listener,String url,
                          boolean authenticateEnable,String username,String password) {
         mUrl = url;
@@ -55,9 +60,10 @@ public class HttpAsyncTask extends AsyncTask<Void, Integer, Integer> {
         mAuthenticateEnable = authenticateEnable;
         mLogin = username;
         mPassword = password;
+        mError = Error.ERROR_NO_ERROR;
     }
     @Override
-    protected Integer doInBackground(Void... params) {
+    protected Boolean doInBackground(Void... params) {
             HttpURLConnection urlConnection = null;
             BufferedReader reader = null;
             try {
@@ -67,6 +73,18 @@ public class HttpAsyncTask extends AsyncTask<Void, Integer, Integer> {
                 urlConnection.setRequestMethod("GET");
                 urlConnection.setRequestProperty("Connection","keep-alive");
                 urlConnection.setRequestProperty("Content-Type", "some/type");
+                urlConnection.setConnectTimeout(500);
+                if(mAuthenticateEnable) {
+                    DigestAuthentication auth = DigestAuthentication.fromResponse(urlConnection);
+                    auth.username(mLogin).password(mPassword);
+                    if (!auth.canRespond()) {
+                        mSuccessful = false;
+                    } else {
+                        urlConnection = (HttpURLConnection) new URL(mUrl).openConnection();
+                        urlConnection.setRequestProperty(DigestChallengeResponse.HTTP_HEADER_AUTHORIZATION,
+                                auth.getAuthorizationForRequest("GET", urlConnection.getURL().getPath()));
+                    }
+                }
                 urlConnection.connect();
                 mResponseCode = urlConnection.getResponseCode();
                 mResponseMessage = urlConnection.getResponseMessage();
@@ -128,93 +146,49 @@ public class HttpAsyncTask extends AsyncTask<Void, Integer, Integer> {
                         mSuccessful = false;
                     }
                 }else if(mResponseCode == 401){
-                    if(mAuthenticateEnable) {
-                        String www_Authenticate = urlConnection.getHeaderField("WWW-Authenticate");
-                        if (www_Authenticate != null) {
-                            if (www_Authenticate.contains("Basic")) {
-                                urlConnection = (HttpURLConnection) new URL(mUrl).openConnection();
-                                urlConnection.setFollowRedirects(false);
-                                urlConnection.setInstanceFollowRedirects(false);
-                                urlConnection.setRequestMethod("GET");
-                                urlConnection.setRequestProperty("Connection","keep-alive");
-                                urlConnection.setRequestProperty("Content-Type", "some/type");
-                                urlConnection.setRequestProperty("Authorization", "Basic " + Base64.encodeToString((mLogin+":"+mPassword).getBytes(), Base64.NO_WRAP));
-                                urlConnection.connect();
-                                mResponseCode = urlConnection.getResponseCode();
-                                mResponseMessage = urlConnection.getResponseMessage();
-                                Log.e("DOWNLOAD2", String.valueOf(mResponseCode));
-                                if(mResponseCode == 200){
-                                    String Content_Length = urlConnection.getHeaderField("Content-Length");
-                                    mFileSize = Long.parseLong(Content_Length);
-                                    String disposition = urlConnection.getHeaderField("Content-Disposition");
-                                    if (disposition != null) {
-                                        int index = disposition.indexOf("filename=");
-                                        if (index > 0) {
-                                            mFileName = disposition.substring(index + 10,
-                                                    disposition.length() - 1);
-                                        }
-                                    } else {
-                                        String str = mUrl.toString();
-                                        mFileName = str.substring(str.lastIndexOf("/") + 1,
-                                                str.length());
-                                    }
-                                    mSuccessful = true;
-                                }else{
-                                    mSuccessful = false;
-                                }
-                            }
-                            if (www_Authenticate.contains("Digest")) {
-                                urlConnection = (HttpURLConnection) new URL(mUrl).openConnection();
-                                urlConnection.setFollowRedirects(false);
-                                urlConnection.setInstanceFollowRedirects(false);
-                                urlConnection.setRequestMethod("GET");
-                                urlConnection.setRequestProperty("Connection","keep-alive");
-                                urlConnection.setRequestProperty("Content-Type", "some/type");
-                                DigestAuthentication auth = DigestAuthentication.fromResponse(urlConnection);
-                                auth.username(mLogin).password(mPassword);
-                                if (!auth.canRespond()) {
-                                    mSuccessful = false;
-                                }else{
-                                    urlConnection = (HttpURLConnection) new URL(mUrl).openConnection();
-                                    urlConnection.setRequestProperty(DigestChallengeResponse.HTTP_HEADER_AUTHORIZATION,
-                                            auth.getAuthorizationForRequest("GET", urlConnection.getURL().getPath()));
-                                    urlConnection.connect();
-                                    mResponseCode = urlConnection.getResponseCode();
-                                    mResponseMessage = urlConnection.getResponseMessage();
-                                    Log.e("DOWNLOAD2", String.valueOf(mResponseCode));
-                                    if(mResponseCode == 200){
-                                        mSuccessful = true;
-                                    }else{
-                                        mSuccessful = false;
-                                    }
-                                }
-                            }
+                    String www_Authenticate = urlConnection.getHeaderField("WWW-Authenticate");
+                    if (www_Authenticate != null) {
+                        if (www_Authenticate.contains("Basic")) {
+                            mAuthenticateType = Authenticate.Authenticate_Basic;
+                        }
+                        if (www_Authenticate.contains("Digest")) {
+                            mAuthenticateType = Authenticate.Authenticate_Digest;
                         }
                     }else{
                         mSuccessful = false;
+                        mResponseMessage = "خطای ناشناخته";
                     }
                 }
-            } catch (UnknownHostException exception) {
+            }catch (SocketTimeoutException exception) {
+                Log.e("PlaceholderFragment", "Error ", exception);
+                mResponseMessage = "زمان طولانی برای اتصال";
+                mSuccessful = false;
+                mError = Error.ERROR_TIMEOUT;
+                return false;
+            }
+            catch (UnknownHostException exception) {
                 Log.e("PlaceholderFragment", "Error ", exception);
                 mResponseMessage = "آدرس موجود نمی باشد";
                 mSuccessful = false;
-                return 0;
+                mError = Error.ERROR_HOST_UNKNOWN;
+                return false;
             } catch (IOException e) {
                 Log.e("PlaceholderFragment", "Error ", e);
                 mResponseMessage = e.toString();
                 mSuccessful = false;
-                return 0;
+                return false;
             } finally {
                 if (urlConnection != null) {
                     urlConnection.disconnect();
                 }
             }
-        return 1;
+        mError = Error.ERROR_NO_ERROR;
+        return true;
     }
     @Override
-    protected void onPostExecute(Integer integer) {
+    protected void onPostExecute(Boolean result) {
         if(mListener != null)
-            mListener.onHeadFinished(mResponseCode);
+            mListener.onHeadFinished(mResponseCode,result);
     }
 
     public long getFileSize() { return mFileSize; }

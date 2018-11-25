@@ -104,11 +104,12 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update("links", contentValues, "id = ? ", new String[] { Long.toString(id) } );
         return true;
     }
-    public boolean updateLink(Long id, String name, String address) {
+    public boolean updateLink(Long id, String name, String address,String fileSize) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(LINKS_COLUMN_NAME, name);
         contentValues.put(LINKS_COLUMN_URL, address);
+        contentValues.put(LINKS_COLUMN_SIZE, fileSize);
         //contentValues.put(LINKS_COLUMN_FILE, path);
         db.update("links", contentValues, "id = ? ", new String[] { Long.toString(id) } );
         return true;

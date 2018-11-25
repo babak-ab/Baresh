@@ -19,8 +19,6 @@ import java.util.TimerTask;
 
 public class Downloader{
     private static final String TAG = "MyActivity";
-
-
     enum Status{
         STOP,CONNECTING,START,ERROR,PAUSE,DOWNLOADING,FINISH
     }
@@ -116,6 +114,8 @@ public class Downloader{
     }
     public void setDownloaded(long mDownloaded) {
         this.mDownloaded = mDownloaded;
+        if(mDownloaded == mFileSize)
+            mStatus = Status.FINISH;
     }
     public String getUrl(){
         return  mUrl;
