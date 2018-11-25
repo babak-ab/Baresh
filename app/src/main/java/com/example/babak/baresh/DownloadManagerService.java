@@ -85,7 +85,8 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
     }
     public void onDownloadFinished(Long downloadId) {
         vibration(200);
-        mdb.updateDownloadedLink(downloadId, mDownloaderHashMap.get(downloadId).getDownloadedSize());
+        mdb.updateDownloadedLink(downloadId, mDownloaderHashMap.get(downloadId).getDownloadedSize(),
+                mDownloaderHashMap.get(downloadId).getDurationTime());
         HashMap<Long,TaskModel> tasks = mDownloaderHashMap.get(downloadId).getTasksModel();
         for (Map.Entry<Long,TaskModel> entry : tasks.entrySet()) {
             mdb.updateTask(entry.getKey(),
@@ -96,7 +97,8 @@ public class DownloadManagerService extends Service implements HttpDownloadListe
         }
     }
     public void onDownloadPause(Long downloadId) {
-        mdb.updateDownloadedLink(downloadId, mDownloaderHashMap.get(downloadId).getDownloadedSize());
+        mdb.updateDownloadedLink(downloadId, mDownloaderHashMap.get(downloadId).getDownloadedSize(),
+                mDownloaderHashMap.get(downloadId).getDurationTime());
         HashMap<Long,TaskModel> tasks = mDownloaderHashMap.get(downloadId).getTasksModel();
         for (Map.Entry<Long,TaskModel> entry : tasks.entrySet()) {
             mdb.updateTask(entry.getKey(),

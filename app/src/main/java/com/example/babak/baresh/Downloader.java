@@ -49,6 +49,7 @@ public class Downloader{
     private Context mContext;
     private DownloadManagerService mDownloadManager;
     public Downloader(long downloadId,String url,String fileName,DownloadManagerService downloadManager) {
+        mDurationTime = 0;
         mDownloadHeadFinished = false;
         mDownloadAccepted = false;
         mStatus = Status.STOP;
@@ -128,7 +129,8 @@ public class Downloader{
     public long getDownloadedSize() { return mDownloaded; }
     public long getDownloadId() { return mDownloadId; }
     public long getSpeed() { return mSpeed; }
-    public long getDurationTime() { return mDurationTime / 1000; }
+    public long getDurationTime() { return mDurationTime; }
+    public void setDurationTime(long durationTime) { mDurationTime = durationTime; }
     public String getErrorString() { return mErrorString; }
     public void setErrorString(String errorString) { mErrorString = errorString; }
     public int getError() { return mError; }
@@ -167,9 +169,13 @@ public class Downloader{
         mTaskModel.get(taskId).setStart(mDownloadTask.get(taskId).getStartByte());
         mDownloadTask.remove(taskId);
         if(mDownloadTask.size() == 0) {
-            mStatus = Status.FINISH;
-            mDownloadManager.onDownloadFinished(mDownloadId);
             mSpeedTask.cancel();
+            if(mDownloaded == mFileSize){
+                mStatus = Status.FINISH;
+            }else{
+                mStatus = Status.PAUSE;
+            }
+            mDownloadManager.onDownloadFinished(mDownloadId);
         }
     }
     public void stopDownload(){
@@ -187,7 +193,6 @@ public class Downloader{
                 task.execute(mUrl);
             }
         }
-        mDurationTime = 0;
         mSpeedTask = new DownloadSpeedTask();
         mTimerUpdate.scheduleAtFixedRate(mSpeedTask, 0, 100);
     }

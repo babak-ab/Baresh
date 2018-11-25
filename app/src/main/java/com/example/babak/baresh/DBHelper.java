@@ -19,6 +19,7 @@ public class DBHelper extends SQLiteOpenHelper {
     public static final String LINKS_COLUMN_ID = "id";
     public static final String LINKS_COLUMN_NAME = "name";
     public static final String LINKS_COLUMN_URL = "url";
+    public static final String LINKS_COLUMN_DURATION = "duration";
     //public static final String LINKS_COLUMN_FILE = "file";
     public static final String LINKS_COLUMN_SIZE = "size";
     public static final String LINKS_COLUMN_DOWNLOADED = "downloaded";
@@ -41,7 +42,7 @@ public class DBHelper extends SQLiteOpenHelper {
                 "create table links " +
                         "(id integer primary key AUTOINCREMENT, name text," +
                         "size integer,type integer,downloaded integer," +
-                        "url text UNIQUE,file text)");
+                        "url text UNIQUE,file text,duration integer)");
 
         db.execSQL("create table tasks " +
                         "(id integer primary key AUTOINCREMENT," +
@@ -97,10 +98,11 @@ public class DBHelper extends SQLiteOpenHelper {
         db.update("links", contentValues, "id = ? ", new String[] { Long.toString(id) } );
         return true;
     }
-    public boolean updateDownloadedLink(Long id, Long downloaded ) {
+    public boolean updateDownloadedLink(Long id, Long downloaded,Long duration) {
         SQLiteDatabase db = this.getWritableDatabase();
         ContentValues contentValues = new ContentValues();
         contentValues.put(LINKS_COLUMN_DOWNLOADED, downloaded);
+        contentValues.put(LINKS_COLUMN_DURATION, duration);
         db.update("links", contentValues, "id = ? ", new String[] { Long.toString(id) } );
         return true;
     }
@@ -147,10 +149,12 @@ public class DBHelper extends SQLiteOpenHelper {
             String url = res.getString(res.getColumnIndex(LINKS_COLUMN_URL));
             String size = res.getString(res.getColumnIndex(LINKS_COLUMN_SIZE));
             String downloaded = res.getString(res.getColumnIndex(LINKS_COLUMN_DOWNLOADED));
+            String duration = res.getString(res.getColumnIndex(LINKS_COLUMN_DURATION));
             Downloader downloader = new Downloader(Long.parseLong(id),url,name,mDownloadManager);
             downloader.setDownloadTask(getAllTasks(downloader.getDownloadId()));
             downloader.setFileSize(Long.parseLong(size));
             downloader.setDownloaded(Long.parseLong(downloaded));
+            downloader.setDurationTime(Long.parseLong(duration));
             array_list.put(Long.parseLong(id),downloader);
             res.moveToNext();
         }

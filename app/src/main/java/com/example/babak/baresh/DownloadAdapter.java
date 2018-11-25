@@ -54,9 +54,7 @@ public class DownloadAdapter extends BaseAdapter {
         LayoutInflater inflater = (LayoutInflater) mContext
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         final Downloader dataModel = (Downloader)getItem(position);
-
         View rowView = inflater.inflate(R.layout.download_row_layout, parent, false);
-
         final ProgressBar progress = (ProgressBar)rowView.findViewById(R.id.download_progressBar);
         final TextView fileName = (TextView) rowView.findViewById(R.id.fileName_textView) ;
         final ImageView imageView = (ImageView) rowView.findViewById(R.id.imageView);
@@ -65,7 +63,23 @@ public class DownloadAdapter extends BaseAdapter {
         final TextView duration = (TextView)rowView.findViewById(R.id.duration_textView);
         fileName.setText(dataModel.getFileName());
         if(dataModel.getStatus() == Downloader.Status.PAUSE){
+            duration.setVisibility(View.VISIBLE);
+            downloadSize.setVisibility(View.VISIBLE);
             imageView.setImageResource(R.drawable.ic_play_arrow_green_900_24dp);
+            if(dataModel.getFileSize() > 0)
+                progress.setProgress((int)(dataModel.getDownloadedSize() / (float)dataModel.getFileSize() * 100.0));
+            String speedStr = getSizeToString(dataModel.getSpeed()) +"/s";
+            speedTextView.setText(speedStr);
+            downloadSize.setText(getSizeToString(dataModel.getDownloadedSize())+"/"+ getSizeToString(dataModel.getFileSize()));
+            String duStr;
+            long time = dataModel.getRemindTime();
+            if(time == -1){
+                duStr = "--:--:--";
+            }else{
+                duStr = getTimeToString((Long) time);
+            }
+            String tiStr =  getTimeToString(dataModel.getDurationTime() / 1000);
+            duration.setText(tiStr + "/" + duStr);
         }else if(dataModel.getStatus() == Downloader.Status.DOWNLOADING){
             duration.setVisibility(View.VISIBLE);
             downloadSize.setVisibility(View.VISIBLE);
@@ -82,25 +96,43 @@ public class DownloadAdapter extends BaseAdapter {
             }else{
                 duStr = getTimeToString((Long) time);
             }
-            String tiStr =  getTimeToString(dataModel.getDurationTime());
+            String tiStr =  getTimeToString(dataModel.getDurationTime() / 1000);
             duration.setText(tiStr + "/" + duStr);
         }else if(dataModel.getStatus() == Downloader.Status.CONNECTING){
             speedTextView.setText("در حال اتصال...");
         }else if(dataModel.getStatus() == Downloader.Status.START){
             duration.setVisibility(View.VISIBLE);
             downloadSize.setVisibility(View.VISIBLE);
+            speedTextView.setText("دانلود شروع شد");
         }else if(dataModel.getStatus() == Downloader.Status.ERROR){
             speedTextView.setText("فایل قابل دانلود نمی باشد");
+        }else if(dataModel.getStatus() == Downloader.Status.STOP){
+            duration.setVisibility(View.VISIBLE);
+            downloadSize.setVisibility(View.VISIBLE);
+            imageView.setImageResource(R.drawable.ic_pause_yellow_900_24dp);
+            if(dataModel.getFileSize() > 0)
+                progress.setProgress((int)(dataModel.getDownloadedSize() / (float)dataModel.getFileSize() * 100.0));
+            String speedStr = getSizeToString(dataModel.getSpeed()) +"/s";
+            speedTextView.setText(speedStr);
+            downloadSize.setText(getSizeToString(dataModel.getDownloadedSize())+"/"+ getSizeToString(dataModel.getFileSize()));
+            String duStr;
+            long time = dataModel.getRemindTime();
+            if(time == -1){
+                duStr = "--:--:--";
+            }else{
+                duStr = getTimeToString((Long) time);
+            }
+            String tiStr =  getTimeToString(dataModel.getDurationTime() /1000);
+            duration.setText(tiStr + "/" + duStr);
         }else if(dataModel.getStatus() == Downloader.Status.FINISH){
             imageView.setImageResource(R.drawable.ic_stop_red_900_24dp);
             speedTextView.setText("دانلود پایان یافت");
             progress.setProgress(100);
             downloadSize.setVisibility(View.VISIBLE);
             duration.setVisibility(View.VISIBLE);
-            duration.setText("--:--:--/--:--:--");
-            downloadSize.setText(getSizeToString(dataModel.getDownloadedSize())+"/"+ getSizeToString(dataModel.getFileSize()));
+            duration.setText(getTimeToString(dataModel.getDurationTime() / 1000));
+            downloadSize.setText(getSizeToString(dataModel.getFileSize()));
         }
-
         return rowView;
     }
     public String getSizeToString(long size){
