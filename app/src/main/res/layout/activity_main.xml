@@ -30,5 +30,8 @@
         android:longClickable="true"
         android:layout_height="match_parent" />
     <!-- Layout for content is here. This can be a RelativeLayout  -->
-
+    <FrameLayout
+        android:id="@+id/pref_container"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </LinearLayout>

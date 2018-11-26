@@ -115,7 +115,6 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         if(data != null){
             showAddDialog(data.toString());
         }
-
     }
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -151,6 +150,11 @@ public class MainActivity extends AppCompatActivity implements ServiceConnection
         switch (item.getItemId()) {
             case R.id.action_add:
                 showAddDialog("");
+                break;
+            case R.id.action_setting:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                break;
             default:
                 break;
         }
