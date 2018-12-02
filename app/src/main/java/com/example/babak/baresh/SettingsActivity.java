@@ -17,10 +17,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 public class SettingsActivity extends AppCompatActivity {
-
-
     private static final int PICKFILE_REQUEST_CODE = 100;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -55,18 +52,17 @@ public class SettingsActivity extends AppCompatActivity {
             // Try if the preference is one of our custom Preferences
             DialogFragment dialogFragment = null;
             if (preference instanceof NumberPickerPreference) {
-                // Create a new instance of TimePreferenceDialogFragment with the key of the related
-                // Preference
                 dialogFragment = NumberPickerDialogFragmentCompat.newInstance(preference.getKey());
             }
-
+            if (preference instanceof PathPreference) {
+                dialogFragment = PathDialogFragmentCompat.newInstance(preference.getKey());
+            }
             if (dialogFragment != null) {
                 // The dialog was created (it was one of our custom Preferences), show the dialog for it
                 dialogFragment.setTargetFragment(this, 0);
-
                 dialogFragment.show(this.getFragmentManager(), "android.support.v7.preference" +
                         ".PreferenceFragment.DIALOG");
-            } else {
+            }else {
                 // Dialog creation could not be handled here. Try with the super method.
                 Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
                 startActivityForResult(intent, PICKFILE_REQUEST_CODE);

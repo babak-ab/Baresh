@@ -28,29 +28,18 @@ public class NumberPickerPreference extends DialogPreference {
     }
 
     public NumberPickerPreference(Context context, AttributeSet attrs) {
-        super(context, attrs);
-
-        // Delegate to other constructor
-        // Use the preferenceStyle as the default style
-        //this(context, attrs, R.attr.preferenceStyle );
+        super(context, attrs,R.attr.preferenceStyle);
         DEFAULT_VALUE = 4;
         setDialogLayoutResource(R.layout.pref_dialog_num_thread);
         setPositiveButtonText(android.R.string.ok);
         setNegativeButtonText(android.R.string.cancel);
-
     }
-
     public NumberPickerPreference(Context context, AttributeSet attrs, int defStyleAttr) {
         // Delegate to other constructor
         this(context, attrs, defStyleAttr, defStyleAttr);
     }
-
     public NumberPickerPreference(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-
-        // Du custom stuff here
-        // ...
-        // read attributes etc.
     }
 
     public void setValue(int value) {

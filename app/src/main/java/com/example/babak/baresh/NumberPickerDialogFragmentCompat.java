@@ -16,7 +16,7 @@ import android.widget.NumberPicker;
 class NumberPickerDialogFragmentCompat extends PreferenceDialogFragmentCompat {
 
     private NumberPicker mNumberPicker;
-    
+
     public static NumberPickerDialogFragmentCompat newInstance(String key) {
         final NumberPickerDialogFragmentCompat
                 fragment = new NumberPickerDialogFragmentCompat();
@@ -50,18 +50,12 @@ class NumberPickerDialogFragmentCompat extends PreferenceDialogFragmentCompat {
         }
     }
 
-    /**
-     * Called when the Dialog is closed.
-     *
-     * @param positiveResult Whether the Dialog was accepted or canceled.
-     */
     @Override
     public void onDialogClosed(boolean positiveResult) {
         if (positiveResult) {
             // Get the current values from the TimePicker
             int value;
             value = mNumberPicker.getValue();
-
             // Save the value
             DialogPreference preference = getPreference();
             if (preference instanceof NumberPickerPreference) {

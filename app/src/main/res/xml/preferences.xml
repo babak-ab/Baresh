@@ -5,7 +5,7 @@
         <!--android:summary="4"-->
         <!--android:key="pref_pref1"-->
         <!--android:defaultValue="Settings"/>-->
-    <EditTextPreference
+    <com.example.babak.baresh.PathPreference
         android:defaultValue="@string/default_path_storage"
         android:key="pref_pref2"
         android:summary="@string/default_path_storage"
