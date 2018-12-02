@@ -16,9 +16,8 @@
         app:popupTheme="@style/ThemeOverlay.AppCompat.Light"/>
 
     <FrameLayout
-        android:id="@+id/content_frame"
+        android:id="@+id/pref_container"
         android:layout_below="@+id/toolbar_setting"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
 </RelativeLayout>

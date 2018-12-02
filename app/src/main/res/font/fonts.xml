@@ -4,4 +4,12 @@
         android:fontStyle="normal"
         android:fontWeight="400"
         android:font="@font/fontawesomewebfont" />
+    <font
+        android:fontStyle="normal"
+        android:fontWeight="400"
+        android:font="@font/vazir" />
+    <font
+        android:fontStyle="normal"
+        android:fontWeight="400"
+        android:font="@font/nabi" />
 </font-family>

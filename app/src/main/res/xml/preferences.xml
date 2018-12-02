@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
-    <PreferenceCategory
-        android:title="General">
-        <EditTextPreference
-            android:title="Title"
-            android:summary="This is title."
-            android:key="title"
-            android:defaultValue="Settings" />
-    </PreferenceCategory>
-    <PreferenceCategory
-        android:title="Color">
-        <CheckBoxPreference
-            android:title="Background"
-            android:summary="This is background."
-            android:key="background"
-            android:defaultValue="false"></CheckBoxPreference>
-    </PreferenceCategory>
+    <!--<com.example.babak.baresh.NumberPickerPreference-->
+        <!--android:title="حداکثر تعداد دانلود"-->
+        <!--android:summary="4"-->
+        <!--android:key="pref_pref1"-->
+        <!--android:defaultValue="Settings"/>-->
+    <EditTextPreference
+        android:defaultValue="@string/default_path_storage"
+        android:key="pref_pref2"
+        android:summary="@string/default_path_storage"
+        android:title="@string/title_path_storage" />
+    <com.example.babak.baresh.NumberPickerPreference
+        android:defaultValue="8"
+        android:key="pref_pref4"
+        android:summary="حداکثر 8 ارتباط"
+        android:fontFamily="@font/vazir"
+        android:title="تعداد ارتباطات با سرور"/>
+    <com.example.babak.baresh.NumberPickerPreference
+        android:defaultValue="8"
+        android:key="pref_pref1"
+        android:summary="حداکثر 8 دانلود"
+        android:fontFamily="@font/vazir"
+        android:title="تعداد دانلود همزمان"/>
+    <!--<SwitchPreference-->
+        <!--android:defaultValue="true"-->
+        <!--android:fontFamily="@font/vazir"/>-->
 </PreferenceScreen>
