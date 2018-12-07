@@ -5,11 +5,36 @@
         <!--android:summary="4"-->
         <!--android:key="pref_pref1"-->
         <!--android:defaultValue="Settings"/>-->
-    <com.example.babak.baresh.PathPreference
-        android:defaultValue="@string/default_path_storage"
-        android:key="pref_pref2"
-        android:summary="@string/default_path_storage"
-        android:title="@string/title_path_storage" />
+    <!--<com.example.babak.baresh.PathPreference-->
+        <!--android:defaultValue="@string/default_path_storage"-->
+        <!--android:key="pref_pref2"-->
+        <!--android:summary="@string/default_path_storage"-->
+        <!--android:title="@string/title_path_storage" />-->
+    <!--<DialogPreference-->
+        <!--android:key="pref_pref3"-->
+        <!--android:title="Fun Thing"-->
+        <!--android:positiveButtonText="OK"-->
+        <!--android:negativeButtonText="Cancel"-->
+        <!--/>-->
+    <!--<com.github.angads25.filepicker.view.FilePickerPreference-->
+        <!--xmlns:app="http://schemas.android.com/apk/res-auto"-->
+        <!--android:key="your_preference_key"-->
+        <!--android:title="Pick a Directory"-->
+        <!--android:summary="Just a Summary"-->
+        <!--android:defaultValue="/sdcard:/mnt"-->
+        <!--app:titleText="Select Directories"-->
+        <!--app:error_dir="/mnt"-->
+        <!--app:root_dir="/sdcard"-->
+        <!--app:selection_mode="multi_mode"-->
+        <!--app:selection_type="dir_select"-->
+        <!--app:extensions="txt:pdf:"/>-->
+    <Preference
+        android:key="dialog_preference"
+        android:defaultValue="/mnt"
+        android:summary="/mnt"
+        android:fontFamily="@font/vazir"
+        android:title="مسیر ذخیره سازی"
+        />
     <com.example.babak.baresh.NumberPickerPreference
         android:defaultValue="8"
         android:key="pref_pref4"

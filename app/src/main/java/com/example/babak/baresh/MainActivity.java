@@ -41,6 +41,7 @@ import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import com.github.angads25.filepicker.view.FilePickerPreference;
 
 public class MainActivity extends AppCompatActivity implements ServiceConnection, DownloadManagerService.CallBack {
 
