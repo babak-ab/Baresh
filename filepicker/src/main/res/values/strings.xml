@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+   <string name="cancel_button_label" tools:ignore="ExtraTranslation,MissingTranslation">Cancel</string>
+   <string name="choose_button_label">Select</string>
+   <string name="default_dir" translatable="false">/sdcard</string>
+   <string name="label_parent_directory" tools:ignore="MissingTranslation">Parent Directory</string>
+   <string name="last_edit" tools:ignore="MissingTranslation">Last edited: </string>
+   <string name="error_dir_access" tools:ignore="MissingTranslation">Directory cannot be accessed</string>
+   <string name="label_parent_dir" translatable="false">...</string>
+    <string name="sdcard_button_label">SD Card</string>
+</resources>

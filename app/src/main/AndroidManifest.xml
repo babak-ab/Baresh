@@ -17,6 +17,7 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:supportsRtl="true"
         android:theme="@style/AppTheme"
+        tools:replace="android:theme"
         tools:ignore="GoogleAppIndexingWarning">
         <activity android:configChanges="keyboard|keyboardHidden|locale|orientation|screenSize" android:name=".MainActivity">
             <intent-filter>

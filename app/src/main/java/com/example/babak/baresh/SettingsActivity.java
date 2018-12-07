@@ -21,7 +21,6 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import java.io.File;
-
 import com.github.angads25.filepicker.controller.DialogSelectionListener;
 import com.github.angads25.filepicker.model.DialogConfigs;
 import com.github.angads25.filepicker.model.DialogProperties;
@@ -64,6 +63,7 @@ public class SettingsActivity extends AppCompatActivity {
             String value = dialogPreference.getSharedPreferences().getString(dialogPreference.getKey(),"/mnt");
             dialogPreference.setSummary(value);
             dialogPreference.setOnPreferenceClickListener(this);
+
 //            dialogPreference.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
 //                public boolean onPreferenceClick(Preference preference) {
 //                    final DirectoryChooserConfig config = DirectoryChooserConfig.builder()
@@ -105,9 +105,9 @@ public class SettingsActivity extends AppCompatActivity {
             properties.offset = new File(DialogConfigs.DEFAULT_DIR);
             properties.extensions = null;
             FilePickerDialog dialog = new FilePickerDialog(getContext(),properties);
-            dialog.setTitle("Select a File");
-            dialog.show();
             dialog.setDialogSelectionListener(this);
+            dialog.setTitle("یک مسیر انتخاب کنید");
+            dialog.show();
             return true;
         }
 
@@ -125,6 +125,7 @@ public class SettingsActivity extends AppCompatActivity {
                     editor.commit();
                 }
         }
+
     }
 
     @Override
